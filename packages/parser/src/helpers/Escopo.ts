@@ -10,16 +10,56 @@ export class Escopo {
   private pilha: IEscopo[] = [];
 
   constructor(
-    inicial: IEscopo = {
-      variáveis: new Map(),
-      funções: new Map([
-        ["escreva", { primitivo: TipoPrimitivo.VAZIO }],
-        ["leia", { primitivo: TipoPrimitivo.CADEIA }],
-        ["limpa", { primitivo: TipoPrimitivo.VAZIO }],
-      ]),
-    },
+    inicial: IEscopo = { variáveis: new Map(), funções: new Map() },
   ) {
-    this.pilha.push(inicial);
+    const variáveisBase = new Map<string, Tipo>([
+      // Constantes de nível lógico e modo de pino (Arduino)
+      ["ALTO", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["BAIXO", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["ENTRADA", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["SAIDA", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["ENTRADA_PULLUP", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["alto", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["baixo", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["entrada", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["saida", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["entrada_pullup", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["INPUT", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["OUTPUT", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["INPUT_PULLUP", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["HIGH", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["LOW", { primitivo: TipoPrimitivo.INTEIRO }],
+
+      // Pinos analógicos mais comuns
+      ["A0", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A1", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A2", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A3", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A4", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A5", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A6", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A7", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A8", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A9", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A10", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A11", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A12", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A13", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A14", { primitivo: TipoPrimitivo.INTEIRO }],
+      ["A15", { primitivo: TipoPrimitivo.INTEIRO }],
+    ]);
+
+    const funçõesBase = new Map<string, Tipo>([
+      ["escreva", { primitivo: TipoPrimitivo.VAZIO }],
+      ["leia", { primitivo: TipoPrimitivo.CADEIA }],
+      ["limpa", { primitivo: TipoPrimitivo.VAZIO }],
+    ]);
+
+    this.pilha.push({
+      variáveis: new Map([...variáveisBase, ...inicial.variáveis]),
+      funções: new Map([...funçõesBase, ...inicial.funções]),
+      função: inicial.função,
+    });
   }
 
   push() {

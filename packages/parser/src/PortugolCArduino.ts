@@ -69,6 +69,60 @@ import {
 import { PortugolNode } from "./PortugolNode.js";
 
 export class PortugolCArduino {
+  private static arduinoFunctions = new Set([
+    "pinMode",
+    "digitalWrite",
+    "digitalRead",
+    "analogWrite",
+    "analogRead",
+    "delay",
+    "delayMicroseconds",
+    "millis",
+    "micros",
+    "tone",
+    "noTone",
+    "pulseIn",
+    "shiftOut",
+    "shiftIn",
+  ]);
+
+  private static arduinoFunctionAliases: Record<string, string> = {
+    // Português
+    modo_pino: "pinMode",
+    escrever_digital: "digitalWrite",
+    ler_digital: "digitalRead",
+    escrever_analogico: "analogWrite",
+    ler_analogico: "analogRead",
+    aguarde: "delay",
+    aguarde_microssegundos: "delayMicroseconds",
+    milissegundos: "millis",
+    microssegundos: "micros",
+    tom: "tone",
+    parar_tom: "noTone",
+
+    // Variações comuns
+    delay_ms: "delay",
+    delay_us: "delayMicroseconds",
+  };
+
+  private static arduinoConstantAliases: Record<string, string> = {
+    ALTO: "HIGH",
+    BAIXO: "LOW",
+    SAIDA: "OUTPUT",
+    ENTRADA: "INPUT",
+    ENTRADA_PULLUP: "INPUT_PULLUP",
+    alto: "HIGH",
+    baixo: "LOW",
+    saida: "OUTPUT",
+    entrada: "INPUT",
+    entrada_pullup: "INPUT_PULLUP",
+    HIGH: "HIGH",
+    LOW: "LOW",
+    OUTPUT: "OUTPUT",
+    INPUT: "INPUT",
+    INPUT_PULLUP: "INPUT_PULLUP",
+  };
+
   private lines: string[] = [];
   private indent = 0;
 
@@ -81,6 +135,9 @@ export class PortugolCArduino {
   }
 
   private emitArquivo(arquivo: Arquivo): string {
+    const isLoopFunction = (nome: string) => nome.trim().toLowerCase() === "loop";
+    const isInicioFunction = (nome: string) => nome.trim().toLowerCase() === "inicio";
+
     this.push("// Código gerado automaticamente pelo Portugol Webstudio");
     this.push("#include <Arduino.h>");
     this.push("");
@@ -103,7 +160,9 @@ export class PortugolCArduino {
       this.push("");
     }
 
-    const funcoesComuns = arquivo.funções.filter(funcao => funcao.nome !== "inicio");
+    const funcoesComuns = arquivo.funções.filter(
+      funcao => !isInicioFunction(funcao.nome) && !isLoopFunction(funcao.nome),
+    );
 
     for (const funcao of funcoesComuns) {
       this.push(`${this.emitFuncaoAssinatura(funcao)};`);
@@ -118,7 +177,8 @@ export class PortugolCArduino {
       this.push("");
     }
 
-    const inicio = arquivo.funções.find(funcao => funcao.nome === "inicio");
+    const inicio = arquivo.funções.find(funcao => isInicioFunction(funcao.nome));
+    const loopUsuario = arquivo.funções.find(funcao => isLoopFunction(funcao.nome));
 
     this.push("void setup() {");
     this.indent++;
@@ -134,6 +194,17 @@ export class PortugolCArduino {
     this.push("}");
     this.push("");
     this.push("void loop() {");
+
+    if (loopUsuario) {
+      this.indent++;
+
+      for (const instrucao of loopUsuario.instruções) {
+        this.emitInstrucao(instrucao);
+      }
+
+      this.indent--;
+    }
+
     this.push("}");
 
     return `${this.lines.join("\n")}\n`;
@@ -639,7 +710,7 @@ export class PortugolCArduino {
     }
 
     if (expressao instanceof ChamadaFuncaoExpr) {
-      const argumentos = expressao.argumentos.map(argumento => this.emitExpressao(argumento)).join(", ");
+      const argumentos = this.getCallArguments(expressao).map(argumento => this.emitExpressao(argumento)).join(", ");
 
       return `${this.emitNomeChamada(expressao)}(${argumentos})`;
     }
@@ -653,7 +724,7 @@ export class PortugolCArduino {
 
   private emitReferencia(expressao: ReferenciaVarExpr | ReferenciaArrayExpr | ReferenciaMatrizExpr): string {
     if (expressao instanceof ReferenciaVarExpr) {
-      return expressao.nome;
+      return PortugolCArduino.resolveArduinoConstantName(expressao.nome) ?? expressao.nome;
     }
 
     if (expressao instanceof ReferenciaArrayExpr) {
@@ -665,12 +736,14 @@ export class PortugolCArduino {
 
   private emitChamadaFuncaoComando(chamada: ChamadaFuncaoExpr) {
     if (!chamada.escopoBiblioteca && chamada.nome === "escreva") {
-      if (chamada.argumentos.length === 0) {
+      const argumentosChamada = this.getCallArguments(chamada);
+
+      if (argumentosChamada.length === 0) {
         this.push("Serial.println();");
         return;
       }
 
-      for (const argumento of chamada.argumentos) {
+      for (const argumento of argumentosChamada) {
         this.push(`Serial.print(${this.emitExpressao(argumento)});`);
       }
 
@@ -682,19 +755,30 @@ export class PortugolCArduino {
       return;
     }
 
-    const argumentos = chamada.argumentos.map(argumento => this.emitExpressao(argumento)).join(", ");
+    const argumentos = this.getCallArguments(chamada).map(argumento => this.emitExpressao(argumento)).join(", ");
 
     this.push(`${this.emitNomeChamada(chamada)}(${argumentos});`);
   }
 
+  private getCallArguments(chamada: ChamadaFuncaoExpr): Expressao[] {
+    return chamada.argumentos.filter(argumento => argumento.constructor.name !== "EscopoBibliotecaExpr");
+  }
+
   private emitNomeChamada(chamada: ChamadaFuncaoExpr): string {
+    const arduinoName = PortugolCArduino.resolveArduinoFunctionName(chamada.nome);
+
     if (!chamada.escopoBiblioteca) {
-      return chamada.nome;
+      return arduinoName ?? chamada.nome;
     }
 
     const biblioteca = chamada.escopoBiblioteca;
+    const bibliotecaLower = biblioteca.toLowerCase();
 
-    if (biblioteca === "Matematica") {
+    if (bibliotecaLower === "arduino") {
+      return arduinoName ?? chamada.nome;
+    }
+
+    if (bibliotecaLower === "matematica") {
       switch (chamada.nome) {
         case "potencia":
           return "pow";
@@ -720,6 +804,18 @@ export class PortugolCArduino {
     }
 
     return `${biblioteca}_${chamada.nome}`;
+  }
+
+  private static resolveArduinoFunctionName(nome: string): string | undefined {
+    if (this.arduinoFunctions.has(nome)) {
+      return nome;
+    }
+
+    return this.arduinoFunctionAliases[nome];
+  }
+
+  private static resolveArduinoConstantName(nome: string): string | undefined {
+    return this.arduinoConstantAliases[nome];
   }
 
   private escapeString(value: string): string {
