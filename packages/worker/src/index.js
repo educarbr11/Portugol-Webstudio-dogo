@@ -1,4 +1,4 @@
-import { PortugolErrorChecker } from "@portugol-webstudio/parser";
+import { PortugolCArduino, PortugolErrorChecker } from "@portugol-webstudio/parser";
 import { PortugolJs } from "@portugol-webstudio/runtime";
 
 function mapError(error) {
@@ -84,6 +84,49 @@ function transpileCode(code) {
   };
 }
 
+/**
+ * @param {string} code
+ */
+function transpileArduinoCode(code) {
+  /**
+   * @type {string | null}
+   */
+  let c = "";
+  let errors = [];
+  let parseErrors = [];
+  let checkTime = 0;
+  let transpileTime = 0;
+
+  try {
+    const checkStart = performance.now();
+    const checkResult = PortugolErrorChecker.checkCode(code);
+
+    errors = checkResult.errors;
+    parseErrors = checkResult.parseErrors;
+
+    const checkEnd = performance.now();
+    checkTime = checkEnd - checkStart;
+
+    const transpileStart = performance.now();
+    c = PortugolCArduino.transpileTree(checkResult.tree);
+    const transpileEnd = performance.now();
+
+    transpileTime = transpileEnd - transpileStart;
+  } catch (error) {
+    parseErrors.push(error);
+  }
+
+  return {
+    c,
+    errors: errors.map(error => mapError(error)),
+    parseErrors: parseErrors.map(error => mapError(error)),
+    times: {
+      check: checkTime,
+      transpile: transpileTime,
+    },
+  };
+}
+
 self.addEventListener("message", function onmessage(e) {
   const { action, id, code } = e.data;
   let result;
@@ -96,6 +139,11 @@ self.addEventListener("message", function onmessage(e) {
 
     case "transpile": {
       result = transpileCode(code);
+      break;
+    }
+
+    case "transpile-arduino": {
+      result = transpileArduinoCode(code);
       break;
     }
 

@@ -16,6 +16,17 @@
     mat-ripple
     type="button"
     class="sidebar-button"
+    title="Gerar código C/Arduino"
+    [disabled]="executor.running || transpiling"
+    (click)="generateArduinoCode()"
+  >
+    <svg-icon src="assets/mdi/code-braces.svg" svgClass="text-blue" aria-hidden="true" focusable="false" />
+  </button>
+
+  <button
+    mat-ripple
+    type="button"
+    class="sidebar-button"
     title="Parar execução"
     [disabled]="!executor.running && !transpiling"
     (click)="stopCode()"

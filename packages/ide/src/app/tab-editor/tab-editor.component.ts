@@ -83,7 +83,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
 
   generatedCodeEditorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     ...this.stdOutEditorOptions,
-    language: "swift",
+    language: "cpp",
   };
 
   sharing = false;
@@ -114,6 +114,11 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       key: "ctrl + enter",
       preventDefault: true,
       command: this.runCode.bind(this),
+    },
+    {
+      key: "ctrl + shift + enter",
+      preventDefault: true,
+      command: this.generateArduinoCode.bind(this),
     },
   ];
 
@@ -240,6 +245,38 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     if (result) {
       this.setEditorErrors([]);
       this.executor.runTranspiled({ ...result, code });
+    }
+  }
+
+  async generateArduinoCode() {
+    this.gaService.event("editor_generate_arduino", "Editor", "Gerar código C/Arduino");
+    setExtra("code", this.code);
+
+    this.transpiling = true;
+
+    const code = this.code ?? "";
+    let result;
+
+    try {
+      result = await this.worker.transpileArduinoCode(code);
+    } catch (error) {
+      captureException(error, { tags: { transpileArduino: true }, extra: { code } });
+
+      alert(
+        "Ocorreu um erro ao gerar o código Arduino, possivelmente o seu navegador não suporta Web Workers. Por favor, tente novamente em outro navegador.",
+      );
+
+      alert(error);
+    } finally {
+      this.transpiling = false;
+    }
+
+    if (result) {
+      this.setEditorErrors(result.errors.concat(result.parseErrors));
+      this.executor.byteCode = result.c;
+      this.executor.stdOut = result.c;
+      this.executor.stdOut$.next(this.executor.stdOut);
+      this.stdOutEditorCursorEnd();
     }
   }
 
@@ -425,6 +462,13 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       label: "Executar código",
       run: this.runCode.bind(this),
+    });
+
+    editor.addAction({
+      id: "generateArduinoCode",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      label: "Gerar código Arduino",
+      run: this.generateArduinoCode.bind(this),
     });
 
     editor.addAction({
