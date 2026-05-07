@@ -10,10 +10,10 @@ $font-family: "Lato", sans-serif !default;
 // Cores Principais //
 //////////////////////
 
-$primary: #e2ae02 !default;
-$secondary: #00b18d !default;
-$blue: #3ca1d8 !default;
-$red: #f1433c !default;
+$primary: #f2a20d !default;
+$secondary: #087fa8 !default;
+$blue: #0f8fbd !default;
+$red: #e33538 !default;
 
 $theme-colors: (
   "primary": $primary,
@@ -26,9 +26,9 @@ $theme-colors: (
 // Cores de Textos //
 /////////////////////
 
-$foreground-100: #121212 !default;
-$foreground-200: #323232 !default;
-$foreground-300: #545454 !default;
+$foreground-100: #111827 !default;
+$foreground-200: #334155 !default;
+$foreground-300: #64748b !default;
 
 $theme-text-colors: (
   "100": $foreground-100,
@@ -42,9 +42,9 @@ $body-color: #000 !default;
 // Cores de Fundo //
 ////////////////////
 
-$background-100: #ffffff !default;
-$background-200: #f4f4f4 !default;
-$background-300: #e0e0e0 !default;
+$background-100: #f8fafc !default;
+$background-200: #eaf0f8 !default;
+$background-300: #d7e1ee !default;
 
 $theme-background-colors: (
   "100": $background-100,

@@ -53,13 +53,13 @@ $theme-modes: (
     // Componente Aba //
     ////////////////////
 
-    --pws-tab-bg: var(--pws-bg-300);
+    --pws-tab-bg: var(--pws-bg-200);
     --pws-tab-bg-rgb: var(--pws-bg-300-rgb);
 
-    --pws-tab-bg-hover: var(--pws-bg-100);
+    --pws-tab-bg-hover: var(--pws-bg-300);
     --pws-tab-bg-hover-rgb: var(--pws-bg-100-rgb);
 
-    --pws-tab-bg-active: var(--pws-bg-200);
+    --pws-tab-bg-active: var(--pws-bg-100);
     --pws-tab-bg-active-rgb: var(--pws-bg-200-rgb);
 
     --pws-tab-color: var(--pws-text-300);
@@ -68,7 +68,7 @@ $theme-modes: (
     --pws-tab-color-hover: var(--pws-text-100);
     --pws-tab-color-hover-rgb: var(--pws-text-100-rgb);
 
-    --pws-tab-color-active: var(--pws-text-200);
+    --pws-tab-color-active: var(--pws-text-100);
     --pws-tab-color-active-rgb: var(--pws-text-200-rgb);
 
     --pws-tab-body-bg: var(--pws-bg-200);

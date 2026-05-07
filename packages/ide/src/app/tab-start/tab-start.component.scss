@@ -7,6 +7,7 @@
   min-width: 100%;
   min-height: 100%;
   padding: 2rem;
+  background-color: var(--pws-body-bg);
 }
 
 .logo {
@@ -42,10 +43,10 @@ nav {
     align-items: center;
     justify-content: center;
     padding: 1.3rem;
-    background-color: var(--pws-body-bg);
+    background-color: var(--pws-bg-200);
     appearance: none;
-    border: none;
-    border-radius: 0.25rem;
+    border: 1px solid var(--pws-border-color);
+    border-radius: 0.5rem;
     color: var(--pws-body-color);
     font-weight: bold;
     cursor: pointer;
@@ -61,6 +62,7 @@ nav {
     &:hover {
       background-color: var(--pws-tab-bg-hover);
       color: var(--pws-tab-color-hover);
+      border-color: rgba(var(--pws-color-primary-rgb), 0.45);
     }
 
     > svg-icon,
@@ -79,14 +81,14 @@ section {
   padding: 0.25rem 1rem;
   font-family: "Lato", sans-serif;
   font-size: 0.95rem;
-  color: #fff;
-  border: 1px solid rgba(30, 30, 30, 0.1);
+  color: var(--pws-text-100);
+  border: 1px solid var(--pws-border-color);
   border-radius: 0.75rem;
   box-shadow:
-    0.3px 0.5px 0.7px hsl(200deg 54% 2% / 0.36),
-    0.8px 1.6px 2px -0.8px hsl(200deg 54% 2% / 0.36),
-    2.1px 4.1px 5.2px -1.7px hsl(200deg 54% 2% / 0.36),
-    5px 10px 12.6px -2.5px hsl(200deg 54% 2% / 0.36);
+    0.3px 0.5px 0.7px rgba(2, 8, 23, 0.36),
+    0.8px 1.6px 2px -0.8px rgba(2, 8, 23, 0.36),
+    2.1px 4.1px 5.2px -1.7px rgba(2, 8, 23, 0.36),
+    5px 10px 12.6px -2.5px rgba(2, 8, 23, 0.36);
 
   h3,
   h4,
@@ -121,7 +123,7 @@ section {
 
   a {
     text-decoration: underline;
-    color: #fafafa;
+    color: var(--pws-text-100);
   }
 }
 
@@ -129,18 +131,18 @@ code {
   font-family: "Lato", sans-serif;
   font-size: 0.85rem;
   border-radius: 0.25rem;
-  background-color: #2d2d2d;
-  color: #fff;
+  background-color: var(--pws-bg-300);
+  color: var(--pws-text-100);
   padding: 0.25rem 0.5rem;
   margin: 0 0.25rem;
 }
 
 section.alert {
-  background: #8c2626;
+  background: var(--pws-color-red);
 }
 
 section.info {
-  background-color: #2559b3;
+  background-color: var(--pws-color-blue);
 }
 
 footer {
@@ -171,8 +173,8 @@ footer {
     position: absolute;
     top: 0;
     right: 0;
-    background-color:var(--pws-color-primary);
-    color: var(--pws-body-bg);
+    background-color: var(--pws-color-primary);
+    color: var(--pws-bg-100);
     font-size: 0.65rem;
     padding: 0.25rem 0.5rem;
     border-radius: 0 0 0 0.25rem;
