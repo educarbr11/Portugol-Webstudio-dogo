@@ -6,7 +6,7 @@
     type="button"
     class="sidebar-button"
     title="Iniciar execução"
-    [disabled]="executor.running || transpiling"
+    [disabled]="executor.running || transpiling || uploadingToBoard"
     (click)="runCode()"
   >
     <svg-icon src="assets/icon-start.svg" svgClass="text-secondary" aria-hidden="true" focusable="false" />
@@ -17,18 +17,64 @@
     type="button"
     class="sidebar-button"
     title="Gerar código C/Arduino"
-    [disabled]="executor.running || transpiling"
+    [disabled]="executor.running || transpiling || uploadingToBoard"
     (click)="generateArduinoCode()"
   >
     <svg-icon src="assets/mdi/code-braces.svg" svgClass="text-blue" aria-hidden="true" focusable="false" />
   </button>
+
+  <div class="arduino-controls">
+    <label>
+      <span>Placa</span>
+      <select [(ngModel)]="selectedBoardId" [disabled]="executor.running || transpiling || uploadingToBoard">
+        @for (board of arduinoBoards; track board.id) {
+          <option [value]="board.id">{{ board.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Porta</span>
+      <select [(ngModel)]="selectedPort" [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts">
+        @if (arduinoPorts.length === 0) {
+          <option value="">Nenhuma porta</option>
+        }
+
+        @for (port of arduinoPorts; track port.name) {
+          <option [value]="port.name">{{ port.name }}</option>
+        }
+      </select>
+    </label>
+
+    <button
+      mat-ripple
+      type="button"
+      class="arduino-action"
+      title="Atualizar portas"
+      [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts"
+      (click)="refreshArduinoPorts()"
+    >
+      <svg-icon src="assets/mdi/refresh.svg" aria-hidden="true" focusable="false" />
+    </button>
+
+    <button
+      mat-ripple
+      type="button"
+      class="arduino-action arduino-upload"
+      title="Enviar para placa"
+      [disabled]="executor.running || transpiling || uploadingToBoard || !selectedPort"
+      (click)="uploadArduinoCode()"
+    >
+      <svg-icon src="assets/mdi/upload.svg" aria-hidden="true" focusable="false" />
+    </button>
+  </div>
 
   <button
     mat-ripple
     type="button"
     class="sidebar-button"
     title="Parar execução"
-    [disabled]="!executor.running && !transpiling"
+    [disabled]="!executor.running && !transpiling && !uploadingToBoard"
     (click)="stopCode()"
   >
     <svg-icon src="assets/mdi/square-rounded-outline.svg" svgClass="text-red" aria-hidden="true" focusable="false" />

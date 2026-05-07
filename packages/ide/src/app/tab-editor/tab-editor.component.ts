@@ -11,6 +11,7 @@ import { GoogleAnalyticsService } from "ngx-google-analytics";
 import { Subscription, combineLatest, debounceTime, fromEventPattern, mergeMap } from "rxjs";
 import { GraphicsRenderer, IGraphicsRendererComponent } from "../../renderer";
 import { IExtendedWindowApi } from "../../types";
+import { ArduinoPort, ArduinoService } from "../arduino.service";
 import { DialogRendererComponent } from "../dialog-renderer/dialog-renderer.component";
 import { FileService } from "../file.service";
 import { SettingsService } from "../settings.service";
@@ -29,12 +30,14 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   private _code$?: Subscription;
   private _stdOut$?: Subscription;
   private _events$?: Subscription;
+  private _arduinoOutput$?: Subscription;
   private _theme$?: Subscription;
   private _settings$?: Subscription;
 
   private gaService = inject(GoogleAnalyticsService);
   private snack = inject(MatSnackBar);
   private worker = inject(WorkerService);
+  private arduinoService = inject(ArduinoService);
   private fileService = inject(FileService);
   private shareService = inject(ShareService);
   private themeService = inject(ThemeService);
@@ -87,6 +90,12 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   };
 
   sharing = false;
+  uploadingToBoard = false;
+  loadingPorts = false;
+  selectedBoardId = this.arduinoService.boards[0].id;
+  selectedPort = "";
+  arduinoPorts: ArduinoPort[] = [];
+  arduinoBoards = this.arduinoService.boards;
 
   hasSaveFilePickerSupport = "showSaveFilePicker" in window;
 
@@ -120,6 +129,11 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       preventDefault: true,
       command: this.generateArduinoCode.bind(this),
     },
+    {
+      key: "ctrl + alt + enter",
+      preventDefault: true,
+      command: this.uploadArduinoCode.bind(this),
+    },
   ];
 
   ngOnInit() {
@@ -128,6 +142,12 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this._stdOut$ = this.executor.stdOut$.subscribe(() => {
       this.stdOutEditorCursorEnd();
     });
+
+    this.arduinoService.initListeners().catch(console.error);
+    this._arduinoOutput$ = this.arduinoService.output$.subscribe(output => {
+      this.appendOutput(output);
+    });
+    this.refreshArduinoPorts().catch(console.error);
 
     this._events$ = this.executor.events.subscribe({
       next: event => {
@@ -214,6 +234,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.worker.abortTranspilation();
     this._code$?.unsubscribe();
     this._events$?.unsubscribe();
+    this._arduinoOutput$?.unsubscribe();
     this._stdOut$?.unsubscribe();
     this._theme$?.unsubscribe();
     this._settings$?.unsubscribe();
@@ -280,6 +301,71 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     }
   }
 
+  async uploadArduinoCode() {
+    this.gaService.event("editor_upload_arduino", "Editor", "Enviar código para Arduino/ESP32");
+    setExtra("code", this.code);
+
+    if (!this.selectedPort) {
+      this.snack.open("Selecione uma porta antes de enviar.", "OK", { duration: 3000 });
+      return;
+    }
+
+    this.uploadingToBoard = true;
+    this.transpiling = true;
+    this.executor.stdOut = "";
+    this.executor.stdOut$.next(this.executor.stdOut);
+    this.appendOutput("Gerando código C/Arduino...\n");
+
+    const code = this.code ?? "";
+    let result;
+
+    try {
+      result = await this.worker.transpileArduinoCode(code);
+    } catch (error) {
+      captureException(error, { tags: { uploadArduinoTranspile: true }, extra: { code } });
+      this.appendOutput(`Erro ao gerar código Arduino:\n${String(error)}\n`);
+      this.snack.open("Erro ao gerar código Arduino.", "OK", { duration: 5000 });
+      this.uploadingToBoard = false;
+      return;
+    } finally {
+      this.transpiling = false;
+    }
+
+    const errors = result.errors.concat(result.parseErrors);
+    this.setEditorErrors(errors);
+
+    if (errors.length > 0) {
+      this.appendOutput(`O código possui ${errors.length} erro(s). Corrija antes de enviar.\n`);
+      this.snack.open("Corrija os erros do código antes de enviar.", "OK", { duration: 5000 });
+      this.uploadingToBoard = false;
+      return;
+    }
+
+    this.executor.byteCode = result.c;
+    this.appendOutput("Código C/Arduino gerado com sucesso.\n");
+
+    try {
+      const setup = await this.arduinoService.checkSetup(this.selectedBoardId);
+
+      if (!setup.ready) {
+        this.appendOutput(`Preparando ${setup.board_label}...\n`);
+        await this.arduinoService.initializeSetup(this.selectedBoardId);
+      }
+
+      this.appendOutput(`Enviando para ${this.selectedPort}...\n`);
+      const uploadResult = await this.arduinoService.compileAndUpload(result.c, this.selectedPort, this.selectedBoardId);
+      this.appendOutput(`\n${uploadResult}\n`);
+      this.snack.open("Código enviado com sucesso.", "OK", { duration: 5000 });
+    } catch (error) {
+      captureException(error, { tags: { uploadArduino: true }, extra: { boardId: this.selectedBoardId, port: this.selectedPort } });
+      this.appendOutput(`\nErro ao enviar para a placa:\n${String(error)}\n`);
+      this.snack.open("Erro ao enviar para a placa.", "OK", { duration: 7000 });
+    } finally {
+      this.uploadingToBoard = false;
+      this.stdOutEditorCursorEnd();
+    }
+  }
+
   stopCode() {
     this.gaService.event("editor_stop_execution", "Editor", "Botão de Parar Execução");
     this.executor.stop();
@@ -289,7 +375,36 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       this.transpiling = false;
     }
 
+    this.uploadingToBoard = false;
+
     this.stdOutEditorCursorEnd();
+  }
+
+  async refreshArduinoPorts() {
+    this.loadingPorts = true;
+
+    try {
+      this.arduinoPorts = await this.arduinoService.readPorts();
+
+      if (!this.selectedPort || !this.arduinoPorts.some(port => port.name === this.selectedPort)) {
+        this.selectedPort = this.arduinoPorts[0]?.name ?? "";
+      }
+
+      if (this.arduinoPorts.length === 0) {
+        this.appendOutput("Nenhuma porta Arduino/ESP32 encontrada.\n");
+      }
+    } catch (error) {
+      console.error(error);
+      this.appendOutput(`Erro ao listar portas seriais:\n${String(error)}\n`);
+      this.snack.open("Erro ao listar portas seriais.", "OK", { duration: 5000 });
+    } finally {
+      this.loadingPorts = false;
+    }
+  }
+
+  private appendOutput(output: string) {
+    this.executor.stdOut += output;
+    this.executor.stdOut$.next(this.executor.stdOut);
   }
 
   async handlePortugolMessage(message: PortugolMessage) {

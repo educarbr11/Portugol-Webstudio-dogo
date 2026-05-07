@@ -274,11 +274,6 @@ export class PortugolCArduino {
       return;
     }
 
-    if (instrucao instanceof AtribuicaoCmd) {
-      this.push(`${this.emitReferencia(instrucao.variável)} = ${this.emitExpressao(instrucao.expressão)};`);
-      return;
-    }
-
     if (instrucao instanceof AtribuicaoCompostaSomaCmd) {
       this.push(this.emitAtribuicaoComposta(instrucao, "+"));
       return;
@@ -296,6 +291,11 @@ export class PortugolCArduino {
 
     if (instrucao instanceof AtribuicaoCompostaDivisaoCmd) {
       this.push(this.emitAtribuicaoComposta(instrucao, "/"));
+      return;
+    }
+
+    if (instrucao instanceof AtribuicaoCmd) {
+      this.push(`${this.emitReferencia(instrucao.variável)} = ${this.emitExpressao(instrucao.expressão)};`);
       return;
     }
 
@@ -499,6 +499,22 @@ export class PortugolCArduino {
   private emitParteFor(inicializacao: Expressao | Comando): string {
     if (inicializacao instanceof DeclaracaoCmd) {
       return this.emitDeclaracao(inicializacao).replace(/;$/u, "");
+    }
+
+    if (inicializacao instanceof AtribuicaoCompostaSomaCmd) {
+      return this.emitAtribuicaoComposta(inicializacao, "+").replace(/;$/u, "");
+    }
+
+    if (inicializacao instanceof AtribuicaoCompostaSubtracaoCmd) {
+      return this.emitAtribuicaoComposta(inicializacao, "-").replace(/;$/u, "");
+    }
+
+    if (inicializacao instanceof AtribuicaoCompostaMultiplicacaoCmd) {
+      return this.emitAtribuicaoComposta(inicializacao, "*").replace(/;$/u, "");
+    }
+
+    if (inicializacao instanceof AtribuicaoCompostaDivisaoCmd) {
+      return this.emitAtribuicaoComposta(inicializacao, "/").replace(/;$/u, "");
     }
 
     if (inicializacao instanceof AtribuicaoCmd) {
