@@ -9,7 +9,7 @@ FECHA_CHAVES:               '}' ;
 
 TIPO:           'real' | 'inteiro' | 'vazio' | 'logico' | 'cadeia' | 'caracter' ; 
 
-FACA:           'faca' ;
+FACA:           'fazer' | 'faca' ;
 ENQUANTO:       'enquanto' ;
 PARA:           'para' ;
 SE:             'se' ;
@@ -17,12 +17,12 @@ SENAO:          'senao' ;
 CONSTANTE:      'const' ;
 FUNCAO:         'funcao' ;
 PROGRAMA:       'programa' ;
-ESCOLHA:        'escolha' ;
+ESCOLHA:        'escolher' | 'escolha' ;
 CASO:           'caso' ;
 CONTRARIO:      'contrario' ;
-PARE:           'pare' ;
-RETORNE:        'retorne';
-INCLUA:         'inclua' ;
+PARE:           'parar' | 'pare' ;
+RETORNE:        'retornar' | 'retorne';
+INCLUA:         'incluir' | 'inclua' ;
 BIBLIOTECA:     'biblioteca' ;
 
 OP_NAO:                 'nao' ;

@@ -15,20 +15,20 @@ programa
       soma += 2
     }
 
-    faca
+    fazer
     {
       soma--
     }
     enquanto (soma > 10)
 
-    escolha (soma)
+    escolher (soma)
     {
       caso 10:
-        escreva("dez")
-        pare
+        escrever("dez")
+        parar
 
       caso contrario:
-        escreva("outro")
+        escrever("outro")
     }
   }
 }

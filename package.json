@@ -36,6 +36,7 @@
     "build:runner": "lerna run build --scope=@portugol-webstudio/runner",
     "build:runtime": "lerna run build --scope=@portugol-webstudio/runtime",
     "test:parser": "lerna run test --scope=@portugol-webstudio/parser",
+    "test:resources": "lerna run test --scope=@portugol-webstudio/resources",
     "release": "lerna run release",
     "postinstall": "patch-package"
   },

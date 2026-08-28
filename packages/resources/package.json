@@ -29,7 +29,8 @@
     "assets"
   ],
   "scripts": {
-    "build": "node --no-warnings --loader ts-node/esm src/atualizar.ts"
+    "build": "node --no-warnings --loader ts-node/esm src/atualizar.ts",
+    "test": "node --no-warnings --loader ts-node/esm scripts/validate-infinitive-patch.mjs"
   },
   "devDependencies": {
     "@swc/core": "^1.15.1",

@@ -69,6 +69,9 @@ import {
 import { PortugolNode } from "./PortugolNode.js";
 
 export class PortugolCArduino {
+  private static inputFunctionNames = new Set(["ler", "leia"]);
+  private static outputFunctionNames = new Set(["escrever", "escreva"]);
+
   private static arduinoFunctions = new Set([
     "pinMode",
     "digitalWrite",
@@ -751,7 +754,7 @@ export class PortugolCArduino {
   }
 
   private emitChamadaFuncaoComando(chamada: ChamadaFuncaoExpr) {
-    if (!chamada.escopoBiblioteca && chamada.nome === "escreva") {
+    if (!chamada.escopoBiblioteca && PortugolCArduino.outputFunctionNames.has(chamada.nome)) {
       const argumentosChamada = this.getCallArguments(chamada);
 
       if (argumentosChamada.length === 0) {
@@ -766,8 +769,8 @@ export class PortugolCArduino {
       return;
     }
 
-    if (!chamada.escopoBiblioteca && chamada.nome === "leia") {
-      this.push("// TODO: leitura de Serial (leia) não implementada no transpiler básico");
+    if (!chamada.escopoBiblioteca && PortugolCArduino.inputFunctionNames.has(chamada.nome)) {
+      this.push("// TODO: leitura de Serial (ler) não implementada no transpiler básico");
       return;
     }
 

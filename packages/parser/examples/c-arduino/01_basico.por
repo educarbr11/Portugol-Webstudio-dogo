@@ -5,7 +5,7 @@ programa
 
   funcao inteiro dobro(inteiro valor)
   {
-    retorne valor * 2
+    retornar valor * 2
   }
 
   funcao inicio()
@@ -19,11 +19,11 @@ programa
 
     se (ligado)
     {
-      escreva(mensagem, " ", marcador, " ", tensao)
+      escrever(mensagem, " ", marcador, " ", tensao)
     }
     senao
     {
-      escreva("desligado")
+      escrever("desligado")
     }
   }
 }

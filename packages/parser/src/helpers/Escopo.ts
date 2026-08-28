@@ -50,8 +50,11 @@ export class Escopo {
     ]);
 
     const funçõesBase = new Map<string, Tipo>([
+      ["escrever", { primitivo: TipoPrimitivo.VAZIO }],
       ["escreva", { primitivo: TipoPrimitivo.VAZIO }],
+      ["ler", { primitivo: TipoPrimitivo.CADEIA }],
       ["leia", { primitivo: TipoPrimitivo.CADEIA }],
+      ["limpar", { primitivo: TipoPrimitivo.VAZIO }],
       ["limpa", { primitivo: TipoPrimitivo.VAZIO }],
     ]);
 
