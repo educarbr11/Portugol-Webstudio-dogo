@@ -55,6 +55,21 @@ npm start
 
 Após isto, você poderá acessar a IDE em: [http://localhost:4200](http://localhost:4200)
 
+## Deploy com Docker
+
+O build de produção compila todos os pacotes do monorepo e serve a aplicação com Nginx:
+
+```sh
+docker build -t portugol-webstudio .
+docker run --rm -p 8080:80 portugol-webstudio
+```
+
+A aplicação ficará disponível em [http://localhost:8080](http://localhost:8080) e o health check em
+`/healthz`.
+
+No Dokploy, utilize o tipo de build `Dockerfile`, o contexto `.`, a porta interna `80` e a branch desejada.
+Não é necessário configurar volume persistente para a aplicação.
+
 ## Contribuidores
 
 - [Douglas Gadêlha](https://github.com/dgadelha)

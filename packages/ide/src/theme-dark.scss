@@ -10,10 +10,10 @@ $font-family: "Lato", sans-serif !default;
 // Cores Principais //
 //////////////////////
 
-$primary: #ffc200 !default;
-$secondary: #00f0c0 !default;
-$blue: #45beff !default;
-$red: #f1433c !default;
+$primary: #ffb21a !default;
+$secondary: #19a7d8 !default;
+$blue: #0f8fbd !default;
+$red: #ff3b3f !default;
 
 $theme-colors: (
   "primary": $primary,
@@ -26,9 +26,9 @@ $theme-colors: (
 // Cores de Textos //
 /////////////////////
 
-$foreground-100: #fff !default;
-$foreground-200: #cdcdcd !default;
-$foreground-300: #A8A7A7 !default;
+$foreground-100: #ffffff !default;
+$foreground-200: #d8deea !default;
+$foreground-300: #a9b4c7 !default;
 
 $theme-text-colors: (
   "100": $foreground-100,
@@ -42,9 +42,9 @@ $body-color: #fff !default;
 // Cores de Fundo //
 ////////////////////
 
-$background-100: #121e24 !default;
-$background-200: #263238 !default;
-$background-300: #445056 !default;
+$background-100: #0f172a !default;
+$background-200: #14213d !default;
+$background-300: #1f2a44 !default;
 
 $theme-background-colors: (
   "100": $background-100,
@@ -58,7 +58,7 @@ $body-bg: $background-100 !default;
 // Cores das Bordas //
 //////////////////////
 
-$border-color: rgba($body-color, 0.15) !default;
+$border-color: rgba($body-color, 0.12) !default;
 
 /////////////////////
 // Material Design //

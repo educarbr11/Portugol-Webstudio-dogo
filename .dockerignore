@@ -1,0 +1,14 @@
+.angular
+.git
+.github
+.vscode
+**/dist
+packages/*/lib
+packages/parser/.generated
+packages/resources/assets
+packages/resources/Portugol-Studio.zip
+packages/resources/recursos.temp
+**/node_modules
+Dockerfile*
+npm-debug.log*
+README.md
