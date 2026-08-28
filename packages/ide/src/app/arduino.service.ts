@@ -1,5 +1,5 @@
 import { Injectable, NgZone, inject } from "@angular/core";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { Subject } from "rxjs";
 
@@ -26,6 +26,7 @@ export class ArduinoService {
   private ngZone = inject(NgZone);
   private unlisteners: UnlistenFn[] = [];
 
+  readonly isAvailable = isTauri();
   readonly output$ = new Subject<string>();
 
   readonly boards: ArduinoBoard[] = [
@@ -34,7 +35,7 @@ export class ArduinoService {
   ];
 
   async initListeners() {
-    if (this.unlisteners.length > 0) {
+    if (!this.isAvailable || this.unlisteners.length > 0) {
       return;
     }
 
@@ -67,26 +68,34 @@ export class ArduinoService {
   }
 
   readPorts() {
-    return invoke<ArduinoPort[]>("read_ports");
+    return this.invokeDesktop<ArduinoPort[]>("read_ports");
   }
 
   checkSetup(boardId: string) {
-    return invoke<ArduinoSetupStatus>("check_arduino_setup", { boardId });
+    return this.invokeDesktop<ArduinoSetupStatus>("check_arduino_setup", { boardId });
   }
 
   initializeSetup(boardId: string) {
-    return invoke<string>("initialize_arduino_setup", { boardId });
+    return this.invokeDesktop<string>("initialize_arduino_setup", { boardId });
   }
 
   compileAndUpload(sketchCode: string, port: string, boardId: string) {
-    return invoke<string>("compile_and_upload", { sketchCode, port, boardId });
+    return this.invokeDesktop<string>("compile_and_upload", { sketchCode, port, boardId });
   }
 
   checkPortStatus(port: string) {
-    return invoke<string>("check_port_status", { port });
+    return this.invokeDesktop<string>("check_port_status", { port });
   }
 
   resetArduino(port: string) {
-    return invoke<string>("reset_arduino", { port });
+    return this.invokeDesktop<string>("reset_arduino", { port });
+  }
+
+  private invokeDesktop<T>(command: string, args?: Record<string, unknown>) {
+    if (!this.isAvailable) {
+      return Promise.reject(new Error("A integração com Arduino está disponível apenas no aplicativo desktop."));
+    }
+
+    return invoke<T>(command, args);
   }
 }

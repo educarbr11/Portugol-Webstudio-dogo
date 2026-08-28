@@ -92,6 +92,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   sharing = false;
   uploadingToBoard = false;
   loadingPorts = false;
+  readonly arduinoAvailable = this.arduinoService.isAvailable;
   selectedBoardId = this.arduinoService.boards[0].id;
   selectedPort = "";
   arduinoPorts: ArduinoPort[] = [];
@@ -124,16 +125,20 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       preventDefault: true,
       command: this.runCode.bind(this),
     },
-    {
-      key: "ctrl + shift + enter",
-      preventDefault: true,
-      command: this.generateArduinoCode.bind(this),
-    },
-    {
-      key: "ctrl + alt + enter",
-      preventDefault: true,
-      command: this.uploadArduinoCode.bind(this),
-    },
+    ...(this.arduinoAvailable
+      ? [
+          {
+            key: "ctrl + shift + enter",
+            preventDefault: true,
+            command: this.generateArduinoCode.bind(this),
+          },
+          {
+            key: "ctrl + alt + enter",
+            preventDefault: true,
+            command: this.uploadArduinoCode.bind(this),
+          },
+        ]
+      : []),
   ];
 
   ngOnInit() {
@@ -143,11 +148,13 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       this.stdOutEditorCursorEnd();
     });
 
-    this.arduinoService.initListeners().catch(console.error);
-    this._arduinoOutput$ = this.arduinoService.output$.subscribe(output => {
-      this.appendOutput(output);
-    });
-    this.refreshArduinoPorts().catch(console.error);
+    if (this.arduinoAvailable) {
+      this.arduinoService.initListeners().catch(console.error);
+      this._arduinoOutput$ = this.arduinoService.output$.subscribe(output => {
+        this.appendOutput(output);
+      });
+      this.refreshArduinoPorts().catch(console.error);
+    }
 
     this._events$ = this.executor.events.subscribe({
       next: event => {
@@ -238,6 +245,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this._stdOut$?.unsubscribe();
     this._theme$?.unsubscribe();
     this._settings$?.unsubscribe();
+    this.arduinoService.destroyListeners();
   }
 
   async runCode() {
@@ -270,6 +278,10 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async generateArduinoCode() {
+    if (!this.arduinoAvailable) {
+      return;
+    }
+
     this.gaService.event("editor_generate_arduino", "Editor", "Gerar código C/Arduino");
     setExtra("code", this.code);
 
@@ -302,6 +314,10 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async uploadArduinoCode() {
+    if (!this.arduinoAvailable) {
+      return;
+    }
+
     this.gaService.event("editor_upload_arduino", "Editor", "Enviar código para Arduino/ESP32");
     setExtra("code", this.code);
 
@@ -353,11 +369,18 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       }
 
       this.appendOutput(`Enviando para ${this.selectedPort}...\n`);
-      const uploadResult = await this.arduinoService.compileAndUpload(result.c, this.selectedPort, this.selectedBoardId);
+      const uploadResult = await this.arduinoService.compileAndUpload(
+        result.c,
+        this.selectedPort,
+        this.selectedBoardId,
+      );
       this.appendOutput(`\n${uploadResult}\n`);
       this.snack.open("Código enviado com sucesso.", "OK", { duration: 5000 });
     } catch (error) {
-      captureException(error, { tags: { uploadArduino: true }, extra: { boardId: this.selectedBoardId, port: this.selectedPort } });
+      captureException(error, {
+        tags: { uploadArduino: true },
+        extra: { boardId: this.selectedBoardId, port: this.selectedPort },
+      });
       this.appendOutput(`\nErro ao enviar para a placa:\n${String(error)}\n`);
       this.snack.open("Erro ao enviar para a placa.", "OK", { duration: 7000 });
     } finally {
@@ -381,6 +404,10 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async refreshArduinoPorts() {
+    if (!this.arduinoAvailable) {
+      return;
+    }
+
     this.loadingPorts = true;
 
     try {
