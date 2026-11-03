@@ -30,6 +30,7 @@
     "eslint:check": "eslint 'packages/**/*.{ts,js,html}'",
     "start": "lerna run start --scope=@portugol-webstudio/ide",
     "build": "lerna run build",
+    "desktop:build": "npm run build && ng build ide --base-href ./",
     "deploy:build": "npm run build && npm run release --workspace=@portugol-webstudio/ide",
     "build:w": "lerna run --parallel build:w",
     "build:parser": "lerna run build --scope=@portugol-webstudio/parser",
