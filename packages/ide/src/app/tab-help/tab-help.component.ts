@@ -1,6 +1,16 @@
 import { NestedTreeControl } from "@angular/cdk/tree";
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, inject, NgZone, OnDestroy, OnInit, output } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  output,
+  viewChild,
+} from "@angular/core";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { GoogleAnalyticsService } from "ngx-google-analytics";
@@ -9,6 +19,8 @@ import { Subscription } from "rxjs";
 import { ResponsiveService } from "../responsive.service";
 import { ThemeService } from "../theme.service";
 import { libsTree } from "./bibliotecas";
+import { getHelpContentBlocks, HelpContentBlock, HelpExample } from "./help-content";
+import { arduinoTutorialsTree } from "./tutoriais-arduino";
 import { TreeItem } from "./types";
 
 type PortugolWindow = Window & {
@@ -29,15 +41,22 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
   private gaService = inject(GoogleAnalyticsService);
   private responsive = inject(ResponsiveService);
   private themeService = inject(ThemeService);
+  private readonly helpPane = viewChild<unknown, ElementRef<HTMLElement>>("helpPane", { read: ElementRef });
 
   _responsive$?: Subscription;
   _theme$?: Subscription;
+  private helpTree$?: Subscription;
+  private content$?: Subscription;
 
   // eslint-disable-next-line @typescript-eslint/no-deprecated
   treeControl = new NestedTreeControl<TreeItem>(node => node.children);
   dataSource = new MatTreeNestedDataSource<TreeItem>();
   current?: TreeItem;
   currentUrl?: SafeResourceUrl;
+  contentBlocks: HelpContentBlock[] = [];
+  loadingContent = false;
+  contentError = false;
+  navigationError = false;
 
   isBelowMd = false;
   isLightTheme = false;
@@ -53,17 +72,16 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
       },
     };
 
-    this.http.get<TreeItem[]>("assets/recursos/ajuda/scripts/topicos.json").subscribe({
-      next: ajuda => {
-        const ajudaWithLibs = ajuda.concat(libsTree);
+    this.dataSource.data = [arduinoTutorialsTree, libsTree];
+    this.treeControl.expand(arduinoTutorialsTree);
+    this.loadItem(arduinoTutorialsTree);
 
-        this.dataSource.data = ajudaWithLibs;
-        this.treeControl.expand(ajudaWithLibs[0]);
-        this.treeControl.expand(ajudaWithLibs[1]);
-        this.loadItem(ajudaWithLibs[0]);
+    this.helpTree$ = this.http.get<TreeItem[]>("assets/recursos/ajuda/scripts/topicos.json").subscribe({
+      next: ajuda => {
+        this.dataSource.data = [arduinoTutorialsTree, ...ajuda, libsTree];
       },
       error: () => {
-        // TODO: tratar erro
+        this.navigationError = true;
       },
     });
 
@@ -80,6 +98,9 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this._responsive$?.unsubscribe();
+    this._theme$?.unsubscribe();
+    this.helpTree$?.unsubscribe();
+    this.content$?.unsubscribe();
   }
 
   hasChildren(_: number, item: TreeItem) {
@@ -87,12 +108,42 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadItem(item: TreeItem) {
-    this.gaService.event("help_navigation", "Ajuda", item.href || item.source);
+    this.content$?.unsubscribe();
+    this.helpPane()?.nativeElement.scrollTo(0, 0);
+    this.gaService.event("help_navigation", "Ajuda", item.href || item.id);
     this.gaService.pageView(item.href || item.id, item.text, item.href || item.id);
     this.current = item;
+    this.contentBlocks = [];
+    this.contentError = false;
+    this.loadingContent = false;
 
     if (item.kind !== "markdown") {
       this.currentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`assets/recursos/ajuda/${item.href}`);
+      return;
     }
+
+    this.currentUrl = undefined;
+
+    if (!item.markdownPath) {
+      this.contentBlocks = getHelpContentBlocks(item.source ?? "", item.text);
+      return;
+    }
+
+    this.loadingContent = true;
+    this.content$ = this.http.get(item.markdownPath, { responseType: "text" }).subscribe({
+      next: source => {
+        this.contentBlocks = getHelpContentBlocks(source, item.text);
+        this.loadingContent = false;
+      },
+      error: () => {
+        this.contentError = true;
+        this.loadingContent = false;
+      },
+    });
+  }
+
+  openExample(example: HelpExample) {
+    this.gaService.event("help_open_example", "Ajuda", this.current?.id);
+    this.newTab.emit(example);
   }
 }

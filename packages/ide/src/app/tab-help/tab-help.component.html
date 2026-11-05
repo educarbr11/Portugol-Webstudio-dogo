@@ -52,14 +52,59 @@
         </mat-nested-tree-node>
       </mat-tree>
     </ul>
+
+    @if (navigationError) {
+      <p class="help-status" role="status">
+        Não foi possível carregar os tópicos gerais. Os tutoriais de Arduino e ESP32 e as bibliotecas continuam
+        disponíveis.
+      </p>
+    }
   </as-split-area>
 
-  <as-split-area>
+  <as-split-area #helpPane>
     <div class="help-content">
       @if (current) {
         @switch (current.kind) {
           @case ("markdown") {
-            <markdown [data]="current.source" />
+            @if (loadingContent) {
+              <p class="help-status" role="status">Carregando tutorial…</p>
+            } @else if (contentError) {
+              <div class="help-status" role="alert">
+                <p>Não foi possível carregar este tutorial. Tente novamente.</p>
+                <button mat-stroked-button type="button" (click)="loadItem(current)">Tentar novamente</button>
+              </div>
+            } @else {
+              <article class="markdown-content" [attr.aria-label]="current.text">
+                @for (block of contentBlocks; track $index) {
+                  @if (block.example; as example) {
+                    <div class="help-example">
+                      <div class="help-example-toolbar">
+                        <span>{{ example.name }}</span>
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          [attr.aria-label]="`Abrir ${example.name} no editor`"
+                          (click)="openExample(example)"
+                        >
+                          Abrir no editor
+                        </button>
+                      </div>
+                      <markdown [data]="block.source" />
+                    </div>
+                  } @else {
+                    <markdown [data]="block.source" />
+                  }
+                }
+
+                @if (current.children?.length) {
+                  <nav class="help-topics" aria-label="Tutoriais desta seção">
+                    @for (topic of current.children; track topic.id) {
+                      <button mat-stroked-button type="button" (click)="loadItem(topic)">{{ topic.text }}</button>
+                    }
+                  </nav>
+                }
+              </article>
+            }
           }
 
           @default {
