@@ -37,6 +37,7 @@
     "build:runner": "lerna run build --scope=@portugol-webstudio/runner",
     "build:runtime": "lerna run build --scope=@portugol-webstudio/runtime",
     "test:parser": "lerna run test --scope=@portugol-webstudio/parser",
+    "test:forms": "node packages/ide/scripts/validate-angular-forms.mjs",
     "test:help": "lerna run build --scope=@portugol-webstudio/parser --include-dependencies && node packages/ide/scripts/validate-help-tutorials.mjs",
     "release": "lerna run release",
     "postinstall": "patch-package"
@@ -45,6 +46,7 @@
     "@angular/build": "^20.3.42",
     "@angular/cli": "^20.3.42",
     "@angular/compiler-cli": "^20.3.35",
+    "@angular/forms": "^20.3.35",
     "@angular/service-worker": "^20.3.35",
     "@eslint/js": "^9.39.1",
     "angular-eslint": "^20.6.0",
