@@ -21,10 +21,27 @@ export interface ArduinoBoard {
   label: string;
 }
 
+export interface UsbDriverDevice {
+  driver_id: string;
+  label: string;
+  device_name: string;
+  instance_id: string;
+  needs_driver: boolean;
+  problem_code: number;
+}
+
+export interface UsbDriverStatus {
+  supported: boolean;
+  devices: UsbDriverDevice[];
+  message: string;
+}
+
 @Injectable({ providedIn: "root" })
 export class ArduinoService {
   private ngZone = inject(NgZone);
   private unlisteners: UnlistenFn[] = [];
+  private attemptedDrivers = new Set<string>();
+  private usbDriverOperation?: Promise<UsbDriverStatus>;
 
   readonly isAvailable = isTauri();
   readonly output$ = new Subject<string>();
@@ -69,6 +86,42 @@ export class ArduinoService {
 
   readPorts() {
     return this.invokeDesktop<ArduinoPort[]>("read_ports");
+  }
+
+  prepareUsbDrivers(retry = false) {
+    this.usbDriverOperation ??= this.prepareUsbDriversOnce(retry).finally(() => {
+      this.usbDriverOperation = undefined;
+    });
+
+    return this.usbDriverOperation;
+  }
+
+  private async prepareUsbDriversOnce(retry: boolean) {
+    const status = await this.invokeDesktop<UsbDriverStatus>("check_usb_drivers");
+    const missing = new Map(
+      status.devices.filter(device => device.needs_driver).map(device => [device.driver_id, device]),
+    );
+    let installed = false;
+
+    for (const [driverId, device] of missing) {
+      if (this.attemptedDrivers.has(driverId) && !retry) {
+        continue;
+      }
+
+      this.attemptedDrivers.add(driverId);
+      this.output$.next(`Driver ${device.label} ausente. Preparando instalação; confirme a autorização do Windows.\n`);
+
+      try {
+        const result = await this.invokeDesktop<string>("install_usb_driver", { driverId });
+        this.output$.next(`${result}\n`);
+        installed = true;
+      } catch (error) {
+        this.output$.next(`Não foi possível concluir a instalação do driver ${device.label}:\n${String(error)}\n`);
+        this.output$.next("Use o botão Driver USB para tentar novamente.\n");
+      }
+    }
+
+    return installed ? this.invokeDesktop<UsbDriverStatus>("check_usb_drivers") : status;
   }
 
   checkSetup(boardId: string) {

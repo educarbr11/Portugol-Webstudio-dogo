@@ -92,6 +92,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   sharing = false;
   uploadingToBoard = false;
   loadingPorts = false;
+  usbDriversSupported = false;
   readonly arduinoAvailable = this.arduinoService.isAvailable;
   selectedBoardId = this.arduinoService.boards[0].id;
   selectedPort = "";
@@ -314,7 +315,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async uploadArduinoCode() {
-    if (!this.arduinoAvailable) {
+    if (!this.arduinoAvailable || this.uploadingToBoard || this.loadingPorts || this.transpiling || this.executor.running) {
       return;
     }
 
@@ -361,6 +362,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.appendOutput("Código C/Arduino gerado com sucesso.\n");
 
     try {
+      const setupStarted = performance.now();
       const setup = await this.arduinoService.checkSetup(this.selectedBoardId);
 
       if (!setup.ready) {
@@ -368,6 +370,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
         await this.arduinoService.initializeSetup(this.selectedBoardId);
       }
 
+      this.appendOutput(`Preparação concluída em ${((performance.now() - setupStarted) / 1000).toFixed(1)} s.\n`);
       this.appendOutput(`Enviando para ${this.selectedPort}...\n`);
       const uploadResult = await this.arduinoService.compileAndUpload(
         result.c,
@@ -403,7 +406,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.stdOutEditorCursorEnd();
   }
 
-  async refreshArduinoPorts() {
+  async refreshArduinoPorts(retryDrivers = false) {
     if (!this.arduinoAvailable) {
       return;
     }
@@ -411,6 +414,16 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.loadingPorts = true;
 
     try {
+      try {
+        const drivers = await this.arduinoService.prepareUsbDrivers(retryDrivers);
+        this.usbDriversSupported = drivers.supported;
+        if (drivers.message && drivers.devices.some(device => device.needs_driver || device.problem_code !== 0)) {
+          this.appendOutput(`${drivers.message}\n`);
+        }
+      } catch (error) {
+        this.appendOutput(`Não foi possível verificar os drivers USB:\n${String(error)}\n`);
+      }
+
       this.arduinoPorts = await this.arduinoService.readPorts();
 
       if (!this.selectedPort || !this.arduinoPorts.some(port => port.name === this.selectedPort)) {

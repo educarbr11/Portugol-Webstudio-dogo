@@ -59,12 +59,25 @@
         <svg-icon src="assets/mdi/refresh.svg" aria-hidden="true" focusable="false" />
       </button>
 
+      @if (usbDriversSupported) {
+        <button
+          mat-ripple
+          type="button"
+          class="arduino-action"
+          title="Verificar e instalar o driver USB da placa conectada"
+          [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts"
+          (click)="refreshArduinoPorts(true)"
+        >
+          Driver USB
+        </button>
+      }
+
       <button
         mat-ripple
         type="button"
         class="arduino-action arduino-upload"
         title="Enviar para placa"
-        [disabled]="executor.running || transpiling || uploadingToBoard || !selectedPort"
+        [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts || !selectedPort"
         (click)="uploadArduinoCode()"
       >
         <svg-icon src="assets/mdi/upload.svg" aria-hidden="true" focusable="false" />
