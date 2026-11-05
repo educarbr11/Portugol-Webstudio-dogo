@@ -20,18 +20,18 @@
     "url": "https://github.com/dgadelha/Portugol-Webstudio/issues"
   },
   "homepage": "https://github.com/dgadelha/Portugol-Webstudio#readme",
-  "packageManager": "^npm@11.0.0",
+  "packageManager": "pnpm@10.34.9",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "lint": "sherif && npm run eslint:check",
+    "lint": "sherif && pnpm run eslint:check",
     "eslint:fix": "eslint --fix 'packages/**/*.{ts,js,html}'",
     "eslint:check": "eslint 'packages/**/*.{ts,js,html}'",
     "start": "lerna run start --scope=@portugol-webstudio/ide",
     "build": "lerna run build",
-    "desktop:build": "npm run build && ng build ide --base-href ./",
-    "deploy:build": "npm run build && npm run release --workspace=@portugol-webstudio/ide",
+    "desktop:build": "pnpm run build && ng build ide --base-href ./",
+    "deploy:build": "pnpm run build && pnpm --filter @portugol-webstudio/ide run release",
     "build:w": "lerna run --parallel build:w",
     "build:parser": "lerna run build --scope=@portugol-webstudio/parser",
     "build:runner": "lerna run build --scope=@portugol-webstudio/runner",
@@ -39,8 +39,7 @@
     "test:parser": "lerna run test --scope=@portugol-webstudio/parser",
     "test:forms": "node packages/ide/scripts/validate-angular-forms.mjs",
     "test:help": "lerna run build --scope=@portugol-webstudio/parser --include-dependencies && node packages/ide/scripts/validate-help-tutorials.mjs",
-    "release": "lerna run release",
-    "postinstall": "patch-package"
+    "release": "lerna run release"
   },
   "devDependencies": {
     "@angular/build": "^20.3.42",
@@ -56,18 +55,9 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "iconv-lite": "0.7.0",
     "lerna": "^9.0.0",
-    "patch-package": "^8.0.1",
     "sherif": "^1.8.0",
     "terser-webpack-plugin": "^5.3.14",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4"
-  },
-  "overrides": {
-    "dompurify": "^3.4.17",
-    "iconv-lite": "0.7.0",
-    "lodash-es": "^4.18.1",
-    "protobufjs": "^7.6.6",
-    "tmp": "^0.2.5",
-    "websocket-driver": "^0.7.5"
   }
 }

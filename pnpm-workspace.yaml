@@ -1,0 +1,27 @@
+packages:
+  - packages/*
+
+nodeLinker: hoisted
+packageImportMethod: auto
+
+overrides:
+  dompurify: ^3.4.17
+  iconv-lite: 0.7.0
+  lodash-es: ^4.18.1
+  protobufjs: ^7.6.6
+  tmp: ^0.2.5
+  websocket-driver: ^0.7.5
+
+patchedDependencies:
+  iconv-lite@0.7.0: patches/iconv-lite@0.7.0.patch
+
+allowBuilds:
+  "@firebase/util": true
+  "@parcel/watcher": true
+  "@swc/core": true
+  esbuild: true
+  fsevents: false
+  lmdb: true
+  msgpackr-extract: true
+  nx: false
+  protobufjs: false

@@ -4,7 +4,9 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+RUN corepack enable && corepack prepare pnpm@10.34.9 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY patches ./patches
 COPY packages/antlr/package.json ./packages/antlr/package.json
 COPY packages/ide/package.json ./packages/ide/package.json
@@ -14,11 +16,11 @@ COPY packages/runner/package.json ./packages/runner/package.json
 COPY packages/runtime/package.json ./packages/runtime/package.json
 COPY packages/worker/package.json ./packages/worker/package.json
 
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run deploy:build
+RUN pnpm run deploy:build
 
 FROM nginx:1.28-alpine AS runtime
 

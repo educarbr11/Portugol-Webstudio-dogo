@@ -9,18 +9,26 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v5
 
+      - name: Setup pnpm 📦
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.9
+          run_install: false
+
       - name: Setup Node.js 📦
         uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies 🔧
-        run: npm ci --include=dev
+        run: pnpm install --frozen-lockfile
 
       - name: Build code 🚚
         run: |
-          npm run build
-          npm run release
+          pnpm run build
+          pnpm run release
 
       - name: Lint 🚨
-        run: npm run lint
+        run: pnpm run lint

@@ -35,9 +35,9 @@
     "build:w": "tsc -w"
   },
   "dependencies": {
-    "@portugol-webstudio/antlr": "*",
-    "@portugol-webstudio/parser": "*",
-    "@portugol-webstudio/runtime": "*",
+    "@portugol-webstudio/antlr": "workspace:*",
+    "@portugol-webstudio/parser": "workspace:*",
+    "@portugol-webstudio/runtime": "workspace:*",
     "antlr4ng": "^3.0.16",
     "rxjs": "~7.8.2"
   },

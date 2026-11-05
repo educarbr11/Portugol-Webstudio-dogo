@@ -33,10 +33,10 @@
   "scripts": {
     "build": "tsc",
     "build:w": "tsc -w",
-    "test": "npm run build && node scripts/validate-c-arduino-examples.mjs"
+    "test": "pnpm run build && node scripts/validate-c-arduino-examples.mjs"
   },
   "dependencies": {
-    "@portugol-webstudio/antlr": "*",
+    "@portugol-webstudio/antlr": "workspace:*",
     "antlr4ng": "^3.0.16"
   },
   "devDependencies": {
