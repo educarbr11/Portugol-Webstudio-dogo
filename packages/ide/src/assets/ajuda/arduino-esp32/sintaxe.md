@@ -70,7 +70,7 @@ programa
 }
 ```
 
-Resultado esperado: a Serial mostra `soma valida: 12 resultado esperado` e uma segunda linha com o marcador e a tensão. Para conferir, abra um monitor serial externo na mesma porta, configurado em 9600 baud, e reinicie a placa. Feche o monitor antes de outro upload.
+Resultado esperado: a Serial mostra `soma valida: 12 resultado esperado` e uma segunda linha com o marcador e a tensão. Para conferir, abra **Monitor serial** no Dogol a 9600 baud e reinicie a placa. O monitor pausa automaticamente antes de outro upload.
 
 ## Laços e escolha
 
@@ -165,6 +165,6 @@ Resultado esperado: a saída é `5`. Matrizes inicializadas diretamente e parâm
 3. Clique em **Atualizar portas** e selecione **Porta**.
 4. Use **Gerar código C/Arduino** para conferir a tradução, se desejar.
 5. Clique em **Enviar para placa**.
-6. Abra um monitor serial externo em 9600 baud e reinicie a placa para observar a saída de `inicio()`.
+6. Abra **Monitor serial** no Dogol a 9600 baud e reinicie a placa para observar a saída de `inicio()`.
 
-`escreva()` com argumentos imprime em sequência, sem espaços ou quebra de linha automáticos. `escreva()` sem argumentos encerra a linha. O Dogol ainda não possui monitor serial integrado nem implementação de `leia()` na placa.
+`escreva()` com argumentos imprime em sequência, sem espaços ou quebra de linha automáticos. `escreva()` sem argumentos encerra a linha. O monitor integrado recebe dados no console; `leia()` na placa e envio de texto pelo monitor ainda não estão implementados.

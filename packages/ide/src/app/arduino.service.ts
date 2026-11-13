@@ -42,9 +42,14 @@ export class ArduinoService {
   private unlisteners: UnlistenFn[] = [];
   private attemptedDrivers = new Set<string>();
   private usbDriverOperation?: Promise<UsbDriverStatus>;
+  private listenerCount = 0;
+  private listenerInit?: Promise<void>;
+  private serialDecoder = new TextDecoder();
+  serialPort: string | null = null;
 
   readonly isAvailable = isTauri();
   readonly output$ = new Subject<string>();
+  readonly serialOutput$ = new Subject<string>();
 
   readonly boards: ArduinoBoard[] = [
     { id: "arduino_uno", label: "Arduino Uno" },
@@ -52,10 +57,20 @@ export class ArduinoService {
   ];
 
   async initListeners() {
-    if (!this.isAvailable || this.unlisteners.length > 0) {
-      return;
-    }
+    if (!this.isAvailable) return;
+    this.listenerCount++;
+    await this.ensureListeners();
+  }
 
+  private ensureListeners() {
+    this.listenerInit ??= this.openListeners().catch(error => {
+      this.listenerInit = undefined;
+      throw error;
+    });
+    return this.listenerInit;
+  }
+
+  private async openListeners() {
     const events = [
       "setup-progress",
       "compile-output",
@@ -65,23 +80,64 @@ export class ArduinoService {
       "upload-progress",
     ];
 
-    this.unlisteners = await Promise.all(
-      events.map(eventName =>
+    this.unlisteners = await Promise.all([
+      ...events.map(eventName =>
         listen<string>(eventName, event => {
           this.ngZone.run(() => {
             this.output$.next(event.payload);
           });
         }),
       ),
-    );
+      listen<{ port: string; data: number[] }>("serial-data", event => {
+        if (event.payload.port !== this.serialPort) return;
+        const text = this.serialDecoder.decode(new Uint8Array(event.payload.data), { stream: true });
+        this.ngZone.run(() => this.serialOutput$.next(text));
+      }),
+      listen<[string, string]>("serial-disconnected", event => {
+        if (event.payload[0] !== this.serialPort) return;
+        this.ngZone.run(() => {
+          this.serialPort = null;
+          this.serialOutput$.next(`\nMonitor serial desconectado: ${event.payload[1]}\n`);
+        });
+      }),
+    ]);
+    if (this.listenerCount === 0) this.closeListeners();
   }
 
   destroyListeners() {
+    this.listenerCount = Math.max(0, this.listenerCount - 1);
+    if (this.listenerCount > 0) return;
+    if (this.serialPort) void this.stopSerialMonitor().catch(console.error);
+    this.closeListeners();
+  }
+
+  private closeListeners() {
     for (const unlisten of this.unlisteners) {
       unlisten();
     }
 
     this.unlisteners = [];
+    this.listenerInit = undefined;
+  }
+
+  async startSerialMonitor(port: string) {
+    await this.ensureListeners();
+    if (this.listenerCount === 0) throw new Error("Abra uma aba do editor para usar o monitor serial.");
+    this.serialDecoder = new TextDecoder();
+    this.serialPort = port;
+    try {
+      await this.invokeDesktop<void>("start_serial_monitor", { port });
+      if (this.listenerCount === 0) await this.stopSerialMonitor();
+    } catch (error) {
+      this.serialPort = null;
+      throw error;
+    }
+  }
+
+  async stopSerialMonitor() {
+    await this.invokeDesktop<void>("stop_serial_monitor");
+    this.serialPort = null;
+    this.serialDecoder = new TextDecoder();
   }
 
   readPorts() {
@@ -132,8 +188,25 @@ export class ArduinoService {
     return this.invokeDesktop<string>("initialize_arduino_setup", { boardId });
   }
 
-  compileAndUpload(sketchCode: string, port: string, boardId: string) {
-    return this.invokeDesktop<string>("compile_and_upload", { sketchCode, port, boardId });
+  async compileAndUpload(sketchCode: string, port: string, boardId: string) {
+    const previousPort = this.serialPort;
+    if (previousPort) await this.stopSerialMonitor();
+    let uploaded = false;
+    try {
+      const result = await this.invokeDesktop<string>("compile_and_upload", { sketchCode, port, boardId });
+      uploaded = true;
+      return result;
+    } finally {
+      const resumePort = uploaded ? port : previousPort;
+      if (resumePort && this.listenerCount > 0) {
+        try {
+          await this.startSerialMonitor(resumePort);
+          this.output$.next(`\nMonitor serial conectado a ${resumePort} — 9600 baud.\n`);
+        } catch (error) {
+          this.output$.next(`\nNão foi possível abrir o monitor serial: ${String(error)}\n`);
+        }
+      }
+    }
   }
 
   checkPortStatus(port: string) {

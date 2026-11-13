@@ -76,6 +76,6 @@ Com `ENTRADA_PULLUP`, o botão ligado ao GND retorna `BAIXO` quando pressionado 
 
 ## Serial
 
-O gerador prepara `Serial.begin(9600)` automaticamente. `escreva("Valor: ", valor)` envia os argumentos para `Serial.print`. Chame `escreva()` sem argumentos para encerrar a linha. Para ler a saída, use um monitor serial externo a 9600 baud; feche-o antes de enviar outro programa.
+O gerador prepara `Serial.begin(9600)` automaticamente. `escreva("Valor: ", valor)` envia os argumentos para `Serial.print`. Chame `escreva()` sem argumentos para encerrar a linha. No desktop, o monitor serial abre no console após um envio bem-sucedido; use **Monitor serial** e **Parar serial** para controlar a leitura a 9600 baud. O app pausa o monitor antes do próximo envio e retoma depois. Feche outros monitores seriais que estejam usando a mesma porta.
 
 `leia()` por Serial, Wi-Fi, Bluetooth e métodos de objetos de bibliotecas externas ainda não têm suporte nesta conversão. Consulte **Arduino e ESP32 > Limitações e compatibilidade** antes de adaptar um exemplo de Arduino C/C++ encontrado em outra fonte.

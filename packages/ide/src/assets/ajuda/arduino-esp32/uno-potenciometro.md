@@ -63,6 +63,6 @@ Girar o potenciômetro altera gradualmente o brilho do LED, entre apagado e bril
 
 ## Experimente e resolva dificuldades
 
-Para conferir os valores, adicione `escreva(leitura)` seguido de `escreva()` e observe a Serial com um monitor externo em 9600 baud. Feche o monitor antes de outro envio.
+Para conferir os valores, adicione `escreva(leitura)` seguido de `escreva()` e observe o console com **Monitor serial** em 9600 baud. O monitor pausa antes de outro envio.
 
 Se o LED só liga ou desliga, confirme que está no pino PWM 9. Se a leitura varia sem tocar no potenciômetro, confira a alimentação, o GND e o terminal central. Se o LED não acende, confira polaridade e resistor. Não remova o resistor para tentar aumentar o brilho.

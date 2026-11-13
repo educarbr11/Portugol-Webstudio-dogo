@@ -60,6 +60,6 @@ Nunca aplique 5 V aos GPIOs do ESP32. Use 3V3 nos circuitos analógicos do ESP32
 
 ## Não vejo o texto de `escreva()`
 
-O Dogol ainda não possui monitor serial integrado. Após a gravação, abra um monitor externo na mesma porta, com **9600 baud**. Se o texto é escrito apenas em `inicio()`, reinicie a placa com o monitor aberto. Feche o monitor antes de fazer outro upload.
+Após a gravação, o monitor serial do Dogol abre no console a **9600 baud**. Você também pode usar **Monitor serial** para iniciar e **Parar serial** para encerrar. Se o texto é escrito apenas em `inicio()`, reinicie a placa com o monitor aberto. O app pausa a leitura antes do próximo upload; feche outros monitores que estejam usando a mesma porta.
 
 Os argumentos de `escreva()` não recebem espaços ou quebras de linha automáticos. Insira espaços nas cadeias e use `escreva()` sem argumentos para encerrar a linha. `leia()` pela Serial ainda não é implementado no código gerado.

@@ -37,7 +37,9 @@
       <label>
         <span>Porta</span>
         <select
-          [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts"
+          [disabled]="
+            executor.running || transpiling || uploadingToBoard || loadingPorts || serialBusy || serialMonitoring
+          "
           [(ngModel)]="selectedPort"
         >
           @for (port of arduinoPorts; track port.name) {
@@ -75,9 +77,27 @@
       <button
         mat-ripple
         type="button"
+        class="arduino-action"
+        title="Monitor serial no console — 9600 baud"
+        [disabled]="
+          serialBusy ||
+          uploadingToBoard ||
+          loadingPorts ||
+          executor.running ||
+          transpiling ||
+          (!selectedPort && !serialMonitoring)
+        "
+        (click)="toggleSerialMonitor()"
+      >
+        {{ serialMonitoring ? "Parar serial" : "Monitor serial" }}
+      </button>
+
+      <button
+        mat-ripple
+        type="button"
         class="arduino-action arduino-upload"
         title="Enviar para placa"
-        [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts || !selectedPort"
+        [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts || serialBusy || !selectedPort"
         (click)="uploadArduinoCode()"
       >
         <svg-icon src="assets/mdi/upload.svg" aria-hidden="true" focusable="false" />
