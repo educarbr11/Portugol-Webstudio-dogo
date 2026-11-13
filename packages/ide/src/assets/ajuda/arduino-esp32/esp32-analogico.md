@@ -66,11 +66,11 @@ Na configuração padrão comum, `ler_analogico` retorna de `0` a `4095`. A cond
 2. Em **Placa**, escolha **ESP32 Dev Module**.
 3. Clique em **Atualizar portas** e selecione a placa em **Porta**.
 4. Clique em **Enviar para placa** e aguarde a conclusão.
-5. Observe os valores no console do Dogol: o monitor abre após o envio a **9600 baud**. Use **Monitor serial** para abrir manualmente. Feche monitores externos que estejam usando a porta.
+5. Observe os valores na aba **Monitor serial** do Dogol: o monitor abre após o envio a **9600 baud**. Use **Monitor serial** para abrir manualmente. Feche monitores externos que estejam usando a porta.
 
 ## Resultado esperado
 
-Ao girar o potenciômetro, a leitura muda. O LED acende quando o valor é maior ou igual a 2048 e apaga abaixo disso. O console mostra uma leitura por linha a cada 250 milissegundos.
+Ao girar o potenciômetro, a leitura muda. O LED acende quando o valor é maior ou igual a 2048 e apaga abaixo disso. O monitor mostra uma leitura por linha a cada 250 milissegundos.
 
 ## Experimente e resolva dificuldades
 

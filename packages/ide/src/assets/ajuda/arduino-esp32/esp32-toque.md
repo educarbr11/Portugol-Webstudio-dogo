@@ -67,12 +67,12 @@ O valor `30` é apenas um ponto de partida. A leitura depende do eletrodo, fio, 
 
 1. Clique em **Abrir no editor**, conecte a montagem e escolha **ESP32 Dev Module**.
 2. Atualize as portas, selecione a placa e clique em **Enviar para placa**.
-3. Após o envio, acompanhe **Toque: valor** no console do Dogol. O monitor abre automaticamente a **9600 baud**. Use **Monitor serial** para abrir manualmente ou **Parar serial** para encerrar. Feche outros monitores que estejam usando a porta.
+3. Após o envio, abra a aba **Monitor serial**, ao lado de **Console**, e acompanhe **Toque: valor**. O monitor abre automaticamente a **9600 baud**. Use **Monitor serial** para abrir manualmente ou **Parar serial** para encerrar. Feche outros monitores que estejam usando a porta.
 4. Anote várias leituras sem tocar no eletrodo e depois enquanto o toca. No ESP32 clássico, escolha um limiar entre os dois grupos.
 5. Por exemplo, se a sua montagem apresentar aproximadamente `60` sem toque e `15` com toque, `30` pode servir como limiar. Esses números são ilustrativos.
 6. Ajuste `limiar` e envie novamente. O monitor do Dogol pausa antes do envio e é retomado ao terminar.
 
-O LED deve acender ao tocar e apagar ao soltar depois da calibração. O console recebe uma leitura a cada 100 milissegundos. A execução comum do Portugol no computador não simula o sensor; use **Enviar para placa**.
+O LED deve acender ao tocar e apagar ao soltar depois da calibração. O monitor recebe uma leitura a cada 100 milissegundos. A execução comum do Portugol no computador não simula o sensor; use **Enviar para placa**.
 
 ## Canais de toque do ESP32 clássico
 

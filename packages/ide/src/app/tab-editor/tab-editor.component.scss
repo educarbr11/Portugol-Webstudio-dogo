@@ -38,6 +38,47 @@
   border-right: 1px solid var(--pws-border-color);
 }
 
+.output-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.output-tabs {
+  display: flex;
+  background: var(--pws-bg-200);
+  border-bottom: 1px solid var(--pws-border-color);
+
+  button {
+    padding: 0.3rem 0.75rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--pws-text-200);
+    cursor: pointer;
+
+    &[aria-selected="true"] {
+      border-bottom-color: var(--pws-color-primary);
+      color: var(--pws-text-100);
+    }
+  }
+}
+
+.console-output,
+app-serial-monitor {
+  flex: 1;
+  min-height: 0;
+}
+
+.console-output {
+  display: flex;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
 .sidebar-button {
   appearance: none;
   display: flex;

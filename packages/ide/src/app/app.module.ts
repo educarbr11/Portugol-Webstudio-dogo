@@ -31,6 +31,7 @@ import { MonacoService } from "./monaco.service";
 import { PwaService } from "./pwa.service";
 import { provideSharingFirebase } from "./sharing-firebase.providers";
 import { TabEditorComponent } from "./tab-editor/tab-editor.component";
+import { SerialMonitorComponent } from "./serial-monitor/serial-monitor.component";
 import { TabHelpComponent } from "./tab-help/tab-help.component";
 import { TabStartComponent } from "./tab-start/tab-start.component";
 import { ThemeService } from "./theme.service";
@@ -39,6 +40,7 @@ import { ThemeService } from "./theme.service";
   imports: [
     BrowserModule,
     FormsModule,
+    SerialMonitorComponent,
     AngularSplitModule,
     MonacoEditorModule,
     KeyboardShortcutsModule.forRoot(),

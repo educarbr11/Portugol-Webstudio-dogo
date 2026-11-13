@@ -19,7 +19,7 @@ O seletor da interface ainda não oferece outros modelos de Arduino ou variantes
 | `Arduino.ler_toque(pino)` / `Arduino.touchRead(pino)` | leitura capacitiva nos GPIOs táteis do ESP32 clássico; indisponível no Uno |
 | `escreva()` | usa Serial a 9600 baud |
 | `leia()` pela Serial | ainda não implementado no gerador |
-| Monitor serial dentro do aplicativo | recebe dados no console a 9600 baud; sem envio de texto para a placa |
+| Monitor serial dentro do aplicativo | recebe dados no painel Monitor serial a 9600 baud por padrão; sem envio de texto para a placa |
 | `Graficos`, arquivos e recursos do computador | não são convertidos para o microcontrolador |
 | Wi-Fi, Bluetooth e APIs específicas de ESP32 | sem mapeamento explícito |
 | Objetos de Servo, ESP32Servo e LedControl | sem mapeamento geral de objetos e métodos |

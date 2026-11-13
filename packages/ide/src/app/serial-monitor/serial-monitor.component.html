@@ -1,0 +1,32 @@
+<div class="serial-toolbar">
+  <button
+    type="button"
+    [disabled]="disabled() || arduino.boardBusy || arduino.serialBusy || (!port() && !arduino.serialPort)"
+    (click)="toggleConnection()"
+  >
+    {{ arduino.serialPort ? "Desconectar" : "Conectar" }}
+  </button>
+  <label>
+    Baud
+    <select
+      aria-label="Velocidade do monitor serial"
+      [disabled]="disabled() || arduino.boardBusy || arduino.serialBusy || !!arduino.serialPort"
+      [(ngModel)]="arduino.serialBaudRate"
+    >
+      @for (baud of arduino.baudRates; track baud) {
+        <option [ngValue]="baud">{{ baud }}</option>
+      }
+    </select>
+  </label>
+  <button type="button" (click)="arduino.clearSerialOutput()">Limpar</button>
+  <label>
+    <input type="checkbox" [(ngModel)]="autoScroll" (ngModelChange)="scrollToEnd()" />
+    Rolagem automática
+  </label>
+  <span class="serial-status" role="status">{{ arduino.serialStatus }}</span>
+</div>
+@if (arduino.serialWarning) {
+  <div class="serial-warning" role="status">{{ arduino.serialWarning }}</div>
+}
+<pre #content class="serial-content" tabindex="0" aria-label="Leituras recebidas da placa">{{ text }}</pre>
+<small>Recepção da placa · código gerado: 9600 baud · mensagens de boot do ESP32: 115200 baud</small>

@@ -60,6 +60,14 @@ Nunca aplique 5 V aos GPIOs do ESP32. Use 3V3 nos circuitos analógicos do ESP32
 
 ## Não vejo o texto de `escreva()`
 
-Após a gravação, o monitor serial do Dogol abre no console a **9600 baud**. Você também pode usar **Monitor serial** para iniciar e **Parar serial** para encerrar. Se o texto é escrito apenas em `inicio()`, reinicie a placa com o monitor aberto. O app pausa a leitura antes do próximo upload; feche outros monitores que estejam usando a mesma porta.
+Após a gravação, o monitor serial do Dogol conecta à placa e mostra os dados na aba **Monitor serial**, ao lado de **Console**, a **9600 baud**. Você também pode usar **Monitor serial** para iniciar e **Parar serial** para encerrar. Se o texto é escrito apenas em `inicio()`, reinicie a placa com o monitor aberto. O app pausa a leitura antes do próximo upload; feche outros monitores que estejam usando a mesma porta.
 
 Os argumentos de `escreva()` não recebem espaços ou quebras de linha automáticos. Insira espaços nas cadeias e use `escreva()` sem argumentos para encerrar a linha. `leia()` pela Serial ainda não é implementado no código gerado.
+
+## O editor parece travar ou os caracteres ficam ilegíveis
+
+As leituras da placa ficam na aba **Monitor serial**; os logs de compilação e gravação ficam em **Console**. A recepção não deve mudar o foco do editor. O painel agrupa as atualizações, conserva os 32 mil caracteres mais recentes e informa quando descarta dados em excesso. Use **Limpar**, **Desconectar** ou desative **Rolagem automática** para consultar o histórico.
+
+O código gerado inicia a Serial a **9600 baud**. O boot do ESP32 usa **115200 baud** e pode aparecer ilegível em 9600; [a documentação da Espressif explica essa diferença](https://docs.espressif.com/projects/esptool/en/latest/esp32/advanced-topics/boot-mode-selection.html). Para diagnosticar o boot, desconecte o monitor, selecione 115200 e conecte novamente. Após enviar outro programa pelo Dogol, o monitor volta a 9600 automaticamente.
+
+Confira se o programa enviado contém `escreva()` dentro de `funcao loop()`. Um programa vazio pode ser enviado com sucesso, mas não produz leituras do sensor. Para acompanhar valores continuamente, use `escreva("Toque: ", leitura)`, depois `escreva()` para encerrar a linha e `Arduino.aguarde(100)` para espaçar as leituras.

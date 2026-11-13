@@ -167,4 +167,4 @@ Resultado esperado: a saída é `5`. Matrizes inicializadas diretamente e parâm
 5. Clique em **Enviar para placa**.
 6. Abra **Monitor serial** no Dogol a 9600 baud e reinicie a placa para observar a saída de `inicio()`.
 
-`escreva()` com argumentos imprime em sequência, sem espaços ou quebra de linha automáticos. `escreva()` sem argumentos encerra a linha. O monitor integrado recebe dados no console; `leia()` na placa e envio de texto pelo monitor ainda não estão implementados.
+`escreva()` com argumentos imprime em sequência, sem espaços ou quebra de linha automáticos. `escreva()` sem argumentos encerra a linha. O monitor integrado recebe dados na aba **Monitor serial**; `leia()` na placa e envio de texto pelo monitor ainda não estão implementados.

@@ -1,0 +1,73 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--pws-bg-100);
+  color: var(--pws-text-100);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.serial-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+}
+
+button,
+select {
+  background: var(--pws-bg-300);
+  color: var(--pws-text-100);
+  border: 1px solid var(--pws-border-color);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+}
+
+button:not(:disabled),
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  opacity: 0.5;
+}
+
+.serial-status,
+small {
+  color: var(--pws-text-300);
+  font-size: 0.75rem;
+}
+
+.serial-warning {
+  padding: 0.25rem 0.5rem;
+  color: var(--pws-color-primary);
+  font-size: 0.8rem;
+}
+
+.serial-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  margin: 0;
+  padding: 0.5rem;
+}
+
+small {
+  padding: 0.25rem 0.5rem;
+}

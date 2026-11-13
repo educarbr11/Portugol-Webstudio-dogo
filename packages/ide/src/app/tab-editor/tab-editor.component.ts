@@ -29,9 +29,9 @@ import { WorkerService } from "../worker.service";
 export class TabEditorComponent implements OnInit, OnDestroy {
   private _code$?: Subscription;
   private _stdOut$?: Subscription;
+  private _waitingForInput$?: Subscription;
   private _events$?: Subscription;
   private _arduinoOutput$?: Subscription;
-  private _serialOutput$?: Subscription;
   private _theme$?: Subscription;
   private _settings$?: Subscription;
 
@@ -95,6 +95,11 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   loadingPorts = false;
   usbDriversSupported = false;
   serialBusy = false;
+  outputView: "console" | "serial" = "console";
+
+  get boardBusy() {
+    return this.arduinoService.boardBusy || this.arduinoService.serialBusy;
+  }
 
   get serialMonitoring() {
     return this.arduinoService.serialPort !== null;
@@ -154,15 +159,19 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this._stdOut$ = this.executor.stdOut$.subscribe(() => {
       this.stdOutEditorCursorEnd();
     });
+    this._waitingForInput$ = this.executor.waitingForInput$.subscribe(waiting => {
+      if (waiting) {
+        this.outputView = "console";
+        setTimeout(() => {
+          if (this.executor.waitingForInput) this.stdOutEditor?.focus();
+        }, 0);
+      }
+    });
 
     if (this.arduinoAvailable) {
       this.arduinoService.initListeners().catch(console.error);
       this._arduinoOutput$ = this.arduinoService.output$.subscribe(output => {
         this.appendOutput(output);
-      });
-      this._serialOutput$ = this.arduinoService.serialOutput$.subscribe(output => {
-        this.executor.stdOut = (this.executor.stdOut + output).slice(-200_000);
-        this.executor.stdOut$.next(this.executor.stdOut);
       });
       this.refreshArduinoPorts().catch(console.error);
     }
@@ -253,8 +262,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this._code$?.unsubscribe();
     this._events$?.unsubscribe();
     this._arduinoOutput$?.unsubscribe();
-    this._serialOutput$?.unsubscribe();
     this._stdOut$?.unsubscribe();
+    this._waitingForInput$?.unsubscribe();
     this._theme$?.unsubscribe();
     this._settings$?.unsubscribe();
     this.arduinoService.destroyListeners();
@@ -331,6 +340,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
       this.uploadingToBoard ||
       this.loadingPorts ||
       this.serialBusy ||
+      this.boardBusy ||
       this.transpiling ||
       this.executor.running
     ) {
@@ -346,6 +356,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     }
 
     this.uploadingToBoard = true;
+    this.outputView = "console";
     this.transpiling = true;
     this.executor.stdOut = "";
     this.executor.stdOut$.next(this.executor.stdOut);
@@ -425,7 +436,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async toggleSerialMonitor() {
-    if (this.serialBusy || this.uploadingToBoard) return;
+    if (this.serialBusy || this.uploadingToBoard || this.boardBusy) return;
+    this.outputView = "serial";
     this.serialBusy = true;
     try {
       if (this.serialMonitoring) {
@@ -433,7 +445,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
         this.appendOutput("\nMonitor serial encerrado.\n");
       } else if (this.selectedPort) {
         await this.arduinoService.startSerialMonitor(this.selectedPort);
-        this.appendOutput(`\nMonitor serial: ${this.selectedPort}, 9600 baud.\n`);
+        this.appendOutput(`\nMonitor serial: ${this.selectedPort}, ${this.arduinoService.serialBaudRate} baud.\n`);
       }
     } catch (error) {
       this.appendOutput(`\nErro no monitor serial: ${String(error)}\n`);
@@ -630,8 +642,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     const model = editor.getModel();
 
     if (model) {
-      // TODO: Find a better way to do this
       setTimeout(() => {
+        if (editor.getModel() !== model) return;
         editor.setPosition({
           lineNumber: model.getLineCount(),
           column: model.getLineMaxColumn(model.getLineCount()),
@@ -642,8 +654,6 @@ export class TabEditorComponent implements OnInit, OnDestroy {
           scrollTop: editor.getScrollHeight(),
         });
       }, 1);
-
-      editor.focus();
     }
   }
 
