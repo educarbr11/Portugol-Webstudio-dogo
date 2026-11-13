@@ -38,6 +38,7 @@
     "build:runtime": "lerna run build --scope=@portugol-webstudio/runtime",
     "test:parser": "lerna run test --scope=@portugol-webstudio/parser",
     "test:forms": "node packages/ide/scripts/validate-angular-forms.mjs",
+    "test:startup": "node packages/ide/scripts/validate-sharing-startup.mjs",
     "test:help": "lerna run build --scope=@portugol-webstudio/parser --include-dependencies && node packages/ide/scripts/validate-help-tutorials.mjs",
     "release": "lerna run release"
   },

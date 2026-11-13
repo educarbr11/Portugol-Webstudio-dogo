@@ -41,4 +41,18 @@ platformBrowser()
   })
   .catch((error: unknown) => {
     console.error(error);
+    const root = document.querySelector("app-root");
+    if (root) {
+      const message = document.createElement("p");
+      message.textContent =
+        "Não foi possível iniciar o editor. Reabra o aplicativo e informe o erro ao suporte se o problema continuar.";
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.textContent = "Tentar novamente";
+      retry.onclick = () => window.location.reload();
+      const panel = document.createElement("section");
+      panel.style.cssText = "display:block;padding:24px;color:#e5e7eb;background:#111827;font:16px sans-serif";
+      panel.append(message, retry);
+      root.replaceChildren(panel);
+    }
   });

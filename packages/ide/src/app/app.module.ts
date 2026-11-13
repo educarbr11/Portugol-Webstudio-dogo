@@ -1,7 +1,5 @@
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { ErrorHandler, inject, isDevMode, NgModule, provideAppInitializer } from "@angular/core";
-import { initializeApp, provideFirebaseApp } from "@angular/fire/app";
-import { getStorage, provideStorage } from "@angular/fire/storage";
 import { FormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
@@ -31,6 +29,7 @@ import { AppComponent } from "./app.component";
 import { DialogOpenExampleComponent } from "./dialog-open-example/dialog-open-example.component";
 import { MonacoService } from "./monaco.service";
 import { PwaService } from "./pwa.service";
+import { provideSharingFirebase } from "./sharing-firebase.providers";
 import { TabEditorComponent } from "./tab-editor/tab-editor.component";
 import { TabHelpComponent } from "./tab-help/tab-help.component";
 import { TabStartComponent } from "./tab-start/tab-start.component";
@@ -65,8 +64,7 @@ import { ThemeService } from "./theme.service";
   ],
   declarations: [AppComponent, TabEditorComponent, TabStartComponent, TabHelpComponent, DialogOpenExampleComponent],
   providers: [
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideStorage(() => getStorage()),
+    ...provideSharingFirebase(environment.firebase),
     provideHttpClient(withInterceptorsFromDi()),
     provideHotToastConfig({
       position: "bottom-right",
