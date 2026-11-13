@@ -142,6 +142,7 @@ void digitalWrite(int, int);
 int digitalRead(int);
 void analogWrite(int, int);
 int analogRead(int);
+uint16_t touchRead(uint8_t);
 void delay(unsigned long);
 void delayMicroseconds(unsigned long);
 unsigned long millis();

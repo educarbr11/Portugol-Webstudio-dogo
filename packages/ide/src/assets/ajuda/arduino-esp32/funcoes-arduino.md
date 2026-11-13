@@ -10,6 +10,7 @@ Nos programas de hardware, use `inclua biblioteca Arduino` e chamadas com o pref
 | `digitalWrite` | `escrever_digital` | pino, nível; define `ALTO` ou `BAIXO` |
 | `digitalRead` | `ler_digital` | pino; retorna o nível digital |
 | `analogRead` | `ler_analogico` | pino ADC; retorna uma leitura inteira |
+| `touchRead` | `ler_toque` | GPIO com sensor capacitivo; retorna uma leitura inteira no ESP32 clássico |
 | `analogWrite` | `escrever_analogico` | pino PWM, valor; controla a razão cíclica |
 
 Exemplos de chamadas isoladas, para consultar a sintaxe:
@@ -19,10 +20,13 @@ Arduino.modo_pino(13, SAIDA)
 Arduino.escrever_digital(13, ALTO)
 inteiro estado = Arduino.ler_digital(2)
 inteiro leitura = Arduino.ler_analogico(A0)
+inteiro toque = Arduino.ler_toque(4)
 Arduino.escrever_analogico(9, 128)
 ```
 
 `analogWrite` gera PWM nos exemplos deste guia, não uma tensão analógica contínua. O pino precisa oferecer a função na placa escolhida. No Uno, use um dos pinos `3`, `5`, `6`, `9`, `10` ou `11` para PWM.
+
+`ler_toque(pino)` é traduzida para `touchRead(pino)`. No ESP32 clássico, a leitura normalmente cai ao tocar no eletrodo; compare o valor com um limiar calibrado na sua montagem. A função retorna uma medição bruta, não um valor lógico. Ela não está disponível no Arduino Uno. Veja **ESP32 Dev Module > ESP32: sensor de toque capacitivo** para o programa completo, pinagem e calibração.
 
 ## Tempo e som
 

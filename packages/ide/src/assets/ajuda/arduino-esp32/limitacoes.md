@@ -16,6 +16,7 @@ O seletor da interface ainda não oferece outros modelos de Arduino ou variantes
 | Variáveis, funções, condições, laços e vetores | convertidos pelas operações documentadas em Arduino e ESP32 > Sintaxe do Portugol para placas |
 | Matrizes simples com dimensões fixas | convertidas; matrizes inicializadas e parâmetros de matriz possuem limitações |
 | Funções básicas de GPIO, ADC, PWM e tempo | reconhecidas pelos nomes e aliases da referência |
+| `Arduino.ler_toque(pino)` / `Arduino.touchRead(pino)` | leitura capacitiva nos GPIOs táteis do ESP32 clássico; indisponível no Uno |
 | `escreva()` | usa Serial a 9600 baud |
 | `leia()` pela Serial | ainda não implementado no gerador |
 | Monitor serial dentro do aplicativo | ainda não disponível; use um monitor externo |

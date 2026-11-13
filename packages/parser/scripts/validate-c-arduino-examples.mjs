@@ -16,6 +16,11 @@ const requiredSnippetsByFile = {
   "02_lacos_escolha.por": ["for (i = 0; i < 5; i++)", "soma += i;", "while ((soma < 20))", "switch (soma)"],
   "03_vetores_matrizes.por": ["int valores[3] = { 1, 2, 3 };", "matriz[0][1] = (matriz[0][0] << 1);"],
   "04_arduino_aliases.por": ["pinMode(led, OUTPUT);", "digitalWrite(led, HIGH);", "void loop()"],
+  "05_esp32_toque.por": [
+    "int leitura = touchRead(pino_toque);",
+    "int leitura_original = touchRead(4);",
+    "if ((touchRead(4) < limiar))",
+  ],
 };
 
 fs.rmSync(buildDir, { recursive: true, force: true });
@@ -46,6 +51,7 @@ fs.writeFileSync(
     "int digitalRead(int);",
     "void analogWrite(int, int);",
     "int analogRead(int);",
+    "uint16_t touchRead(uint8_t);",
     "void delay(unsigned long);",
     "void delayMicroseconds(unsigned long);",
     "unsigned long millis();",

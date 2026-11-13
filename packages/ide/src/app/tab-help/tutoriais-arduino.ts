@@ -56,7 +56,7 @@ O Arduino Uno usa lógica de **5 V**. Ao usar um LED externo, coloque um resisto
       kind: "markdown",
       source: `# Tutoriais para ESP32 Dev Module
 
-Pratique saídas digitais, botão, ADC, PWM e temporização com o ESP32 clássico.
+Pratique saídas digitais, botão, ADC, PWM, toque capacitivo e temporização com o ESP32 clássico.
 
 Os exemplos usam um LED externo no **GPIO 18**, pois o LED integrado varia conforme a placa. Confira o pinout do seu modelo antes de montar.
 
@@ -65,6 +65,7 @@ O ESP32 usa lógica de **3,3 V**. Nunca aplique 5 V diretamente nos GPIOs.`,
         tutorial("esp32-led", "ESP32: piscar um LED externo"),
         tutorial("esp32-botao", "ESP32: ler um botão"),
         tutorial("esp32-analogico", "ESP32: leitura analógica de sensor"),
+        tutorial("esp32-toque", "ESP32: sensor de toque capacitivo"),
         tutorial("esp32-pwm", "ESP32: controlar brilho por PWM"),
         tutorial("esp32-temporizacao", "ESP32: temporização sem bloquear"),
       ],
