@@ -2,7 +2,7 @@
 
 ## Objetivo e materiais
 
-Alterne um LED a cada segundo sem usar `aguarde()`. Você precisa de ESP32 Dev Module clássico, cabo USB de dados, LED, resistor de 220 Ω a 330 Ω, protoboard e jumpers.
+Alterne um LED a cada segundo sem usar `espere()`. Você precisa de ESP32 Dev Module clássico, cabo USB de dados, LED, resistor de 220 Ω a 330 Ω, protoboard e jumpers.
 
 Este é um exemplo didático para **ESP32** e sessões curtas. `inteiro` vira `int` de 32 bits com sinal nessa placa, enquanto `millis()` retorna originalmente um valor sem sinal. O programa não trata o limite de aproximadamente **24,8 dias** em que o tempo deixa de caber no `int`. Não use esta versão para aplicações contínuas de longa duração. No Uno, o `int` normalmente tem apenas 16 bits e o limite aparece muito antes; não adapte este exemplo apenas trocando os pinos.
 
@@ -23,8 +23,6 @@ O ESP32 usa lógica de 3,3 V e seus GPIOs não toleram 5 V.
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro led = 18
   inteiro instante_anterior = 0
   inteiro intervalo = 1000
@@ -32,12 +30,12 @@ programa
 
   funcao inicio()
   {
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    inteiro agora = Arduino.milissegundos()
+    inteiro agora = milissegundos()
 
     se (agora - instante_anterior >= intervalo)
     {
@@ -46,11 +44,11 @@ programa
 
       se (ligado)
       {
-        Arduino.escrever_digital(led, ALTO)
+        escrever_digital(led, LIGADO)
       }
       senao
       {
-        Arduino.escrever_digital(led, BAIXO)
+        escrever_digital(led, DESLIGADO)
       }
     }
   }

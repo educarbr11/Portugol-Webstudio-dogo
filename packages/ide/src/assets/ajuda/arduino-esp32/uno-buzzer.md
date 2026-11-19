@@ -21,21 +21,19 @@ Desconecte a alimentação antes de ligar os componentes.
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro buzzer = 8
 
   funcao inicio()
   {
-    Arduino.modo_pino(buzzer, SAIDA)
+    modo_pino(buzzer, SAIDA)
   }
 
   funcao loop()
   {
-    Arduino.tom(buzzer, 440)
-    Arduino.aguarde(500)
-    Arduino.parar_tom(buzzer)
-    Arduino.aguarde(500)
+    tom(buzzer, 440)
+    espere(500)
+    parar_tom(buzzer)
+    espere(500)
   }
 }
 ```

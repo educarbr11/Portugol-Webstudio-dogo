@@ -20,18 +20,21 @@ Aprenda a programar sua placa em Portugol com tutoriais completos, ligações e 
 ## Por onde começar
 
 1. Leia **Primeiros passos e envio para a placa** para conectar e preparar seu Arduino Uno ou ESP32 Dev Module.
-2. Consulte **Sintaxe do Portugol para placas** e **Funções e constantes Arduino**.
+2. Consulte **Sintaxe do Portugol para placas**, **Funções e constantes Arduino** e **Mapear valores entre faixas**.
 3. Escolha um circuito na pasta da sua placa e siga as ligações antes de enviar o programa.
 
 Cada programa completo tem um botão **Abrir no editor**. O exemplo abre em uma nova aba para você estudar, alterar e enviar para a placa.
 
 Os tutoriais ficam disponíveis no aplicativo sem internet. O primeiro preparo de cada placa precisa de conexão para baixar o core e as bibliotecas.
 
+A versão 0.1.5 oferece sintaxe sem prefixo, servo, DHT11/DHT22, PIR, umidade do solo, ultrassônico e mapeamento de faixas. Consulte os tutoriais e o glossário para usar cada recurso e tratar falhas de leitura.
+
 Se encontrar dificuldades, consulte **Limitações e compatibilidade** e **Solução de problemas**.`,
   children: [
     tutorial("primeiros-passos", "Primeiros passos e envio para a placa"),
     tutorial("sintaxe", "Sintaxe do Portugol para placas"),
     tutorial("funcoes-arduino", "Funções e constantes Arduino"),
+    tutorial("mapear", "Mapear valores entre faixas"),
     {
       id: "arduino-uno-tutoriais",
       text: "Arduino Uno",
@@ -56,7 +59,7 @@ O Arduino Uno usa lógica de **5 V**. Ao usar um LED externo, coloque um resisto
       kind: "markdown",
       source: `# Tutoriais para ESP32 Dev Module
 
-Pratique saídas digitais, botão, ADC, PWM, toque capacitivo e temporização com o ESP32 clássico.
+Pratique saídas digitais, botão, ADC, PWM, toque capacitivo, servo, sensores DHT, PIR, umidade do solo, ultrassônico e temporização com o ESP32 clássico.
 
 Os exemplos usam um LED externo no **GPIO 18**, pois o LED integrado varia conforme a placa. Confira o pinout do seu modelo antes de montar.
 
@@ -68,6 +71,11 @@ O ESP32 usa lógica de **3,3 V**. Nunca aplique 5 V diretamente nos GPIOs.`,
         tutorial("esp32-toque", "ESP32: sensor de toque capacitivo"),
         tutorial("esp32-pwm", "ESP32: controlar brilho por PWM"),
         tutorial("esp32-temporizacao", "ESP32: temporização sem bloquear"),
+        tutorial("esp32-servo", "ESP32: controlar um servo motor"),
+        tutorial("esp32-dht", "ESP32: temperatura e umidade com DHT"),
+        tutorial("esp32-pir", "ESP32: detectar movimento com PIR"),
+        tutorial("esp32-solo", "ESP32: umidade do solo e calibração"),
+        tutorial("esp32-ultrassonico", "ESP32: distância com sensor ultrassônico"),
       ],
     },
     tutorial("limitacoes", "Limitações e compatibilidade"),

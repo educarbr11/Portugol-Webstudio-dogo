@@ -22,28 +22,26 @@ Em botões de quatro terminais, dois terminais do mesmo lado podem já estar con
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro botao = 2
   inteiro led = 13
 
   funcao inicio()
   {
-    Arduino.modo_pino(botao, ENTRADA_PULLUP)
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(botao, ENTRADA_BOTAO)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    inteiro estado = Arduino.ler_digital(botao)
+    inteiro estado = ler_entrada(botao)
 
-    se (estado == BAIXO)
+    se (estado == DESLIGADO)
     {
-      Arduino.escrever_digital(led, ALTO)
+      escrever_digital(led, LIGADO)
     }
     senao
     {
-      Arduino.escrever_digital(led, BAIXO)
+      escrever_digital(led, DESLIGADO)
     }
   }
 }
@@ -51,7 +49,7 @@ programa
 
 ## Entenda o código
 
-`ENTRADA_PULLUP` mantém a leitura em `ALTO` quando o botão está solto. Ao pressionar, o botão conecta o pino ao GND e a leitura vira `BAIXO`. A comparação `estado == BAIXO` verifica essa condição. O bloco `se` acende o LED; `senao` o apaga.
+`ENTRADA_BOTAO` mantém a leitura em `LIGADO` quando o botão está solto. Ao pressionar, o botão conecta o pino ao GND e a leitura vira `DESLIGADO`. A comparação `estado == DESLIGADO` verifica essa condição. O bloco `se` acende o LED; `senao` o apaga.
 
 ## Enviar para a placa
 
@@ -66,6 +64,6 @@ O LED integrado fica aceso enquanto o botão é pressionado e apaga ao soltá-lo
 
 ## Experimente e resolva dificuldades
 
-Inverta a condição para `estado == ALTO` e observe a mudança. Se o LED fica sempre aceso, confira os contatos escolhidos no botão e se o pino 2 está em curto permanente com GND. Se o estado parece instável, confirme `ENTRADA_PULLUP` e as conexões.
+Inverta a condição para `estado == LIGADO` e observe a mudança. Se o LED fica sempre aceso, confira os contatos escolhidos no botão e se o pino 2 está em curto permanente com GND. Se o estado parece instável, confirme `ENTRADA_BOTAO` e as conexões.
 
 Este programa lê o estado atual; não conta cliques. Botões mecânicos podem produzir vários pulsos rápidos por pressão. Para contar cliques, será necessário tratar esse efeito de contato, chamado debounce.

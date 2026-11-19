@@ -23,28 +23,26 @@ O ESP32 trabalha com lógica de **3,3 V**. Seus GPIOs não toleram 5 V. Os núme
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro led = 18
 
   funcao inicio()
   {
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    Arduino.escrever_digital(led, ALTO)
-    Arduino.aguarde(500)
-    Arduino.escrever_digital(led, BAIXO)
-    Arduino.aguarde(500)
+    escrever_digital(led, LIGADO)
+    espere(500)
+    escrever_digital(led, DESLIGADO)
+    espere(500)
   }
 }
 ```
 
 ## Entenda o código
 
-`inicio()` configura o GPIO 18 como saída. `loop()` escreve `ALTO`, espera 500 milissegundos, escreve `BAIXO` e espera novamente. Ao terminar, o loop recomeça. As pausas fazem um ciclo completo de um segundo.
+`inicio()` configura o GPIO 18 como saída. `loop()` escreve `LIGADO`, espera 500 milissegundos, escreve `DESLIGADO` e espera novamente. Ao terminar, o loop recomeça. As pausas fazem um ciclo completo de um segundo.
 
 ## Enviar para a placa
 

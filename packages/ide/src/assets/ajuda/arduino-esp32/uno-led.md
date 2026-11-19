@@ -16,28 +16,26 @@ Controle uma saída digital e aprenda a diferença entre `inicio()` e `loop()`. 
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro led = 13
 
   funcao inicio()
   {
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    Arduino.escrever_digital(led, ALTO)
-    Arduino.aguarde(1000)
-    Arduino.escrever_digital(led, BAIXO)
-    Arduino.aguarde(1000)
+    escrever_digital(led, LIGADO)
+    espere(1000)
+    escrever_digital(led, DESLIGADO)
+    espere(1000)
   }
 }
 ```
 
 ## Entenda o código
 
-`inteiro led = 13` guarda o número do pino. `inicio()` configura esse pino como `SAIDA` uma única vez. Em `loop()`, `escrever_digital` alterna entre `ALTO` e `BAIXO`. `aguarde(1000)` pausa por 1000 milissegundos, ou um segundo. O loop começa novamente depois da segunda pausa.
+`inteiro led = 13` guarda o número do pino. `inicio()` configura esse pino como `SAIDA` uma única vez. Em `loop()`, `escrever_digital` alterna entre `LIGADO` e `DESLIGADO`. `espere(1000)` pausa por 1000 milissegundos, ou um segundo. O loop começa novamente depois da segunda pausa.
 
 ## Enviar para a placa
 

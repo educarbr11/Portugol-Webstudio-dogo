@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { MonacoEditorLoaderService } from "@materia-ui/ngx-monaco-editor";
+import { arduinoFunctions } from "@portugol-webstudio/parser/lib/arduino-language.js";
 import { filter, take } from "rxjs/operators";
 
 @Injectable({ providedIn: "root" })
@@ -18,6 +19,30 @@ export class MonacoService {
             id: "portugol",
             extensions: [".por"],
             aliases: ["Portugol"],
+          });
+
+          monaco.languages.registerCompletionItemProvider("portugol", {
+            provideCompletionItems(model, position) {
+              const word = model.getWordUntilPosition(position);
+              const range = new monaco.Range(
+                position.lineNumber,
+                word.startColumn,
+                position.lineNumber,
+                word.endColumn,
+              );
+              return {
+                suggestions: arduinoFunctions.map(definition => ({
+                  label: definition.name,
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  detail: `Arduino/ESP32 · ${definition.returnType} · ${definition.minArgs}${definition.maxArgs === definition.minArgs ? "" : `–${definition.maxArgs}`} argumento(s)`,
+                  documentation:
+                    "Função para a placa. Use Gerar código C/Arduino ou Enviar para placa; sensores não são simulados no computador.",
+                  insertText: `${definition.name}(${Array.from({ length: definition.minArgs }, (_, index) => `\${${index + 1}:valor${index + 1}}`).join(", ")})$0`,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                  range,
+                })),
+              };
+            },
           });
 
           monaco.languages.setLanguageConfiguration("portugol", {
@@ -232,7 +257,7 @@ export class MonacoService {
                 { include: "common" },
               ],
             },
-          } as monaco.languages.IMonarchLanguage);
+          });
 
           monaco.editor.defineTheme("portugol-dark", {
             base: "vs-dark",

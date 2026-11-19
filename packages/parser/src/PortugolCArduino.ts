@@ -1,6 +1,8 @@
-import { ArquivoContext } from "@portugol-webstudio/antlr";
+import { ArquivoContext, PortugolCodeError } from "@portugol-webstudio/antlr";
 
 import { Tipo } from "./helpers/Tipo.js";
+import { arduinoFunctions, arduinoConstants, ArduinoFeature } from "./arduino-language.js";
+import { arduinoRuntime } from "./arduino-runtime.js";
 import {
   Arquivo,
   AtribuiçãoCmd as AtribuicaoCmd,
@@ -69,61 +71,9 @@ import {
 import { PortugolNode } from "./PortugolNode.js";
 
 export class PortugolCArduino {
-  private static arduinoFunctions = new Set([
-    "pinMode",
-    "digitalWrite",
-    "digitalRead",
-    "analogWrite",
-    "analogRead",
-    "touchRead",
-    "delay",
-    "delayMicroseconds",
-    "millis",
-    "micros",
-    "tone",
-    "noTone",
-    "pulseIn",
-    "shiftOut",
-    "shiftIn",
-  ]);
-
-  private static arduinoFunctionAliases: Record<string, string> = {
-    // Português
-    modo_pino: "pinMode",
-    escrever_digital: "digitalWrite",
-    ler_digital: "digitalRead",
-    escrever_analogico: "analogWrite",
-    ler_analogico: "analogRead",
-    ler_toque: "touchRead",
-    aguarde: "delay",
-    aguarde_microssegundos: "delayMicroseconds",
-    milissegundos: "millis",
-    microssegundos: "micros",
-    tom: "tone",
-    parar_tom: "noTone",
-
-    // Variações comuns
-    delay_ms: "delay",
-    delay_us: "delayMicroseconds",
-  };
-
-  private static arduinoConstantAliases: Record<string, string> = {
-    ALTO: "HIGH",
-    BAIXO: "LOW",
-    SAIDA: "OUTPUT",
-    ENTRADA: "INPUT",
-    ENTRADA_PULLUP: "INPUT_PULLUP",
-    alto: "HIGH",
-    baixo: "LOW",
-    saida: "OUTPUT",
-    entrada: "INPUT",
-    entrada_pullup: "INPUT_PULLUP",
-    HIGH: "HIGH",
-    LOW: "LOW",
-    OUTPUT: "OUTPUT",
-    INPUT: "INPUT",
-    INPUT_PULLUP: "INPUT_PULLUP",
-  };
+  private features = new Set<ArduinoFeature>();
+  private userFunctions = new Set<string>();
+  private variableScopes: Array<Set<string>> = [new Set()];
 
   private lines: string[] = [];
   private indent = 0;
@@ -137,12 +87,16 @@ export class PortugolCArduino {
   }
 
   private emitArquivo(arquivo: Arquivo): string {
+    this.userFunctions = new Set(arquivo.funções.map(funcao => funcao.nome));
+    this.variableScopes = [new Set(arquivo.declarações.map(declaracao => declaracao.nome))];
     const isLoopFunction = (nome: string) => nome.trim().toLowerCase() === "loop";
     const isInicioFunction = (nome: string) => nome.trim().toLowerCase() === "inicio";
 
     this.push("// Código gerado automaticamente pelo Portugol Webstudio");
     this.push("#include <Arduino.h>");
     this.push("");
+
+    const runtimePosition = this.lines.length;
 
     if (arquivo.bibliotecas.length > 0) {
       this.push("// Bibliotecas Portugol detectadas:");
@@ -187,9 +141,7 @@ export class PortugolCArduino {
     this.push("Serial.begin(9600);");
 
     if (inicio) {
-      for (const instrucao of inicio.instruções) {
-        this.emitInstrucao(instrucao);
-      }
+      this.emitInstructions(inicio.instruções);
     }
 
     this.indent--;
@@ -200,15 +152,14 @@ export class PortugolCArduino {
     if (loopUsuario) {
       this.indent++;
 
-      for (const instrucao of loopUsuario.instruções) {
-        this.emitInstrucao(instrucao);
-      }
+      this.emitInstructions(loopUsuario.instruções);
 
       this.indent--;
     }
 
     this.push("}");
 
+    this.lines.splice(runtimePosition, 0, ...arduinoRuntime(this.features));
     return `${this.lines.join("\n")}\n`;
   }
 
@@ -216,9 +167,10 @@ export class PortugolCArduino {
     this.push(`${this.emitFuncaoAssinatura(funcao)} {`);
     this.indent++;
 
-    for (const instrucao of funcao.instruções) {
-      this.emitInstrucao(instrucao);
-    }
+    this.emitInstructions(
+      funcao.instruções,
+      funcao.parâmetros.map(parametro => parametro.nome),
+    );
 
     this.indent--;
     this.push("}");
@@ -320,9 +272,7 @@ export class PortugolCArduino {
       this.push(`if (${this.emitExpressao(instrucao.condição)}) {`);
       this.indent++;
 
-      for (const item of instrucao.instruções) {
-        this.emitInstrucao(item);
-      }
+      this.emitInstructions(instrucao.instruções);
 
       this.indent--;
 
@@ -330,9 +280,7 @@ export class PortugolCArduino {
         this.push("} else {");
         this.indent++;
 
-        for (const item of instrucao.senão.instruções) {
-          this.emitInstrucao(item);
-        }
+        this.emitInstructions(instrucao.senão.instruções);
 
         this.indent--;
       }
@@ -345,9 +293,7 @@ export class PortugolCArduino {
       this.push(`while (${this.emitExpressao(instrucao.condição)}) {`);
       this.indent++;
 
-      for (const item of instrucao.instruções) {
-        this.emitInstrucao(item);
-      }
+      this.emitInstructions(instrucao.instruções);
 
       this.indent--;
       this.push("}");
@@ -358,9 +304,7 @@ export class PortugolCArduino {
       this.push("do {");
       this.indent++;
 
-      for (const item of instrucao.instruções) {
-        this.emitInstrucao(item);
-      }
+      this.emitInstructions(instrucao.instruções);
 
       this.indent--;
       this.push(`} while (${this.emitExpressao(instrucao.condição)});`);
@@ -368,6 +312,7 @@ export class PortugolCArduino {
     }
 
     if (instrucao instanceof ParaCmd) {
+      this.variableScopes.push(new Set());
       const inicializacao = instrucao.inicialização ? this.emitParteFor(instrucao.inicialização) : "";
       const condicao = instrucao.condição ? this.emitForCondicao(instrucao.condição) : "";
       const incremento = instrucao.incremento ? this.emitExpressao(instrucao.incremento) : "";
@@ -375,16 +320,16 @@ export class PortugolCArduino {
       this.push(`for (${inicializacao}; ${condicao}; ${incremento}) {`);
       this.indent++;
 
-      for (const item of instrucao.instruções) {
-        this.emitInstrucao(item);
-      }
+      this.emitInstructions(instrucao.instruções);
 
       this.indent--;
       this.push("}");
+      this.variableScopes.pop();
       return;
     }
 
     if (instrucao instanceof EscolhaCmd) {
+      this.variableScopes.push(new Set());
       this.push(`switch (${this.emitExpressao(instrucao.condição)}) {`);
       this.indent++;
 
@@ -394,6 +339,7 @@ export class PortugolCArduino {
 
       this.indent--;
       this.push("}");
+      this.variableScopes.pop();
       return;
     }
 
@@ -413,9 +359,7 @@ export class PortugolCArduino {
     }
 
     if (instrucao instanceof SenaoCmd) {
-      for (const item of instrucao.instruções) {
-        this.emitInstrucao(item);
-      }
+      this.emitInstructions(instrucao.instruções);
 
       return;
     }
@@ -440,18 +384,17 @@ export class PortugolCArduino {
   }
 
   private emitDeclaracao(declaracao: DeclaracaoCmd): string {
+    this.variableScopes.at(-1)!.add(declaracao.nome);
     const tipo = this.emitTipo(declaracao.tipo);
-    const declaracaoVetor = declaracao.children.find(
-      child => child instanceof DeclaracaoVetorExpr,
-    ) as DeclaracaoVetorExpr | undefined;
-    const declaracaoMatriz = declaracao.children.find(
-      child => child instanceof DeclaracaoMatrizExpr,
-    ) as DeclaracaoMatrizExpr | undefined;
-    const declaracaoVariavel = declaracao.children.find(
-      child => child instanceof DeclaracaoVariavelExpr,
-    ) as DeclaracaoVariavelExpr | undefined;
+    const declaracaoVetor = declaracao.children.find(child => child instanceof DeclaracaoVetorExpr) as
+      DeclaracaoVetorExpr | undefined;
+    const declaracaoMatriz = declaracao.children.find(child => child instanceof DeclaracaoMatrizExpr) as
+      DeclaracaoMatrizExpr | undefined;
+    const declaracaoVariavel = declaracao.children.find(child => child instanceof DeclaracaoVariavelExpr) as
+      DeclaracaoVariavelExpr | undefined;
 
-    const tipoVetor = "dimensão" in declaracao.tipo && declaracao.tipo.dimensão === "vetor" ? declaracao.tipo : undefined;
+    const tipoVetor =
+      "dimensão" in declaracao.tipo && declaracao.tipo.dimensão === "vetor" ? declaracao.tipo : undefined;
     const tipoMatriz =
       "dimensão" in declaracao.tipo && declaracao.tipo.dimensão === "matriz" ? declaracao.tipo : undefined;
 
@@ -599,7 +542,11 @@ export class PortugolCArduino {
       return `'${this.escapeChar(expressao.conteúdo)}'`;
     }
 
-    if (expressao instanceof ReferenciaVarExpr || expressao instanceof ReferenciaArrayExpr || expressao instanceof ReferenciaMatrizExpr) {
+    if (
+      expressao instanceof ReferenciaVarExpr ||
+      expressao instanceof ReferenciaArrayExpr ||
+      expressao instanceof ReferenciaMatrizExpr
+    ) {
       return this.emitReferencia(expressao);
     }
 
@@ -728,7 +675,9 @@ export class PortugolCArduino {
     }
 
     if (expressao instanceof ChamadaFuncaoExpr) {
-      const argumentos = this.getCallArguments(expressao).map(argumento => this.emitExpressao(argumento)).join(", ");
+      const argumentos = this.getCallArguments(expressao)
+        .map(argumento => this.emitExpressao(argumento))
+        .join(", ");
 
       return `${this.emitNomeChamada(expressao)}(${argumentos})`;
     }
@@ -742,7 +691,10 @@ export class PortugolCArduino {
 
   private emitReferencia(expressao: ReferenciaVarExpr | ReferenciaArrayExpr | ReferenciaMatrizExpr): string {
     if (expressao instanceof ReferenciaVarExpr) {
-      return PortugolCArduino.resolveArduinoConstantName(expressao.nome) ?? expressao.nome;
+      if (!expressao.escopoBiblioteca && this.variableScopes.some(scope => scope.has(expressao.nome)))
+        return expressao.nome;
+      if (expressao.nome === "DHT11" || expressao.nome === "DHT22") this.features.add("dht");
+      return arduinoConstants[expressao.nome] ?? expressao.nome;
     }
 
     if (expressao instanceof ReferenciaArrayExpr) {
@@ -773,7 +725,9 @@ export class PortugolCArduino {
       return;
     }
 
-    const argumentos = this.getCallArguments(chamada).map(argumento => this.emitExpressao(argumento)).join(", ");
+    const argumentos = this.getCallArguments(chamada)
+      .map(argumento => this.emitExpressao(argumento))
+      .join(", ");
 
     this.push(`${this.emitNomeChamada(chamada)}(${argumentos});`);
   }
@@ -783,7 +737,27 @@ export class PortugolCArduino {
   }
 
   private emitNomeChamada(chamada: ChamadaFuncaoExpr): string {
-    const arduinoName = PortugolCArduino.resolveArduinoFunctionName(chamada.nome);
+    const isArduino = !chamada.escopoBiblioteca || chamada.escopoBiblioteca.toLowerCase() === "arduino";
+    const isUserFunction = !chamada.escopoBiblioteca && this.userFunctions.has(chamada.nome);
+    const definition =
+      isArduino && !isUserFunction
+        ? arduinoFunctions.find(funcao => funcao.name === chamada.nome || funcao.aliases.includes(chamada.nome))
+        : undefined;
+    if (definition) {
+      const count = this.getCallArguments(chamada).length;
+      if (count < definition.minArgs || count > definition.maxArgs) {
+        const expected =
+          definition.minArgs === definition.maxArgs
+            ? `${definition.minArgs}`
+            : `${definition.minArgs} a ${definition.maxArgs}`;
+        throw PortugolCodeError.fromContext(
+          chamada.ctx,
+          `${chamada.nome}: esperado(s) ${expected} argumento(s), recebido(s) ${count}.`,
+        );
+      }
+      if (definition.feature) this.features.add(definition.feature);
+    }
+    const arduinoName = definition?.cppName;
 
     if (!chamada.escopoBiblioteca) {
       return arduinoName ?? chamada.nome;
@@ -824,18 +798,11 @@ export class PortugolCArduino {
     return `${biblioteca}_${chamada.nome}`;
   }
 
-  private static resolveArduinoFunctionName(nome: string): string | undefined {
-    if (this.arduinoFunctions.has(nome)) {
-      return nome;
-    }
-
-    return this.arduinoFunctionAliases[nome];
+  private emitInstructions(instructions: Array<Expressao | Comando>, names: string[] = []) {
+    this.variableScopes.push(new Set(names));
+    for (const instruction of instructions) this.emitInstrucao(instruction);
+    this.variableScopes.pop();
   }
-
-  private static resolveArduinoConstantName(nome: string): string | undefined {
-    return this.arduinoConstantAliases[nome];
-  }
-
   private escapeString(value: string): string {
     return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("\n", "\\n");
   }

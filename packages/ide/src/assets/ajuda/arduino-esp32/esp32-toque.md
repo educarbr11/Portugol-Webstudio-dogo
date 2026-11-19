@@ -16,48 +16,46 @@ Desconecte a alimentação antes de montar.
 | GPIO 18                    | resistor em série com o ânodo do LED |
 | Cátodo do LED              | GND                                  |
 
-Prenda o eletrodo sobre uma base isolante. Não o conecte a 3V3, 5V ou GND: ele recebe somente o fio do GPIO de toque. Mantenha os fios curtos e confira o pinout da placa. `ler_toque` configura a leitura capacitiva; não é necessário chamar `modo_pino` nem habilitar `ENTRADA_PULLUP` para o eletrodo.
+Prenda o eletrodo sobre uma base isolante. Não o conecte a 3V3, 5V ou GND: ele recebe somente o fio do GPIO de toque. Mantenha os fios curtos e confira o pinout da placa. `ler_toque` configura a leitura capacitiva; não é necessário chamar `modo_pino` nem habilitar `ENTRADA_BOTAO` para o eletrodo.
 
 ## Programa completo
 
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro pino_toque = 4
   inteiro led = 18
   inteiro limiar = 30
 
   funcao inicio()
   {
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    inteiro leitura = Arduino.ler_toque(pino_toque)
+    inteiro leitura = ler_toque(pino_toque)
 
     escreva("Toque: ", leitura)
     escreva()
 
     se (leitura < limiar)
     {
-      Arduino.escrever_digital(led, ALTO)
+      escrever_digital(led, LIGADO)
     }
     senao
     {
-      Arduino.escrever_digital(led, BAIXO)
+      escrever_digital(led, DESLIGADO)
     }
 
-    Arduino.aguarde(100)
+    espere(100)
   }
 }
 ```
 
 ## Entenda a tradução
 
-`Arduino.ler_toque(pino_toque)` gera `touchRead(pino_toque)` no C/Arduino. O nome original `Arduino.touchRead(pino_toque)` também é aceito. O argumento é o **número do GPIO**, não o número do canal: para T0, passe `4`, não `0`.
+`ler_toque(pino_toque)` gera `touchRead(pino_toque)` no C/Arduino. O nome original `touchRead(pino_toque)` também é aceito. O argumento é o **número do GPIO**, não o número do canal: para T0, passe `4`, não `0`.
 
 A chamada retorna uma leitura capacitiva bruta, não `verdadeiro` ou `falso`. No ESP32 clássico ela normalmente diminui quando o dedo toca o eletrodo. A condição `leitura < limiar` transforma essa medição em uma decisão para o LED.
 

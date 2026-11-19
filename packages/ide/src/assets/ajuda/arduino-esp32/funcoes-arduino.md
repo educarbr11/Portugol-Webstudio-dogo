@@ -1,81 +1,113 @@
-# Funções Arduino
+# Funções e constantes Arduino
 
-Nos programas de hardware, use `inclua biblioteca Arduino` e chamadas com o prefixo `Arduino.`. O gerador reconhece o nome original ou o alias em português. Essas chamadas controlam a placa depois da compilação e do envio; não simulam os pinos na execução comum do Portugol.
+A partir da versão 0.1.5, escreva as funções de hardware diretamente, como `modo_pino(18, SAIDA)`. Não é necessário usar o prefixo `Arduino.` nem `inclua biblioteca Arduino`. Os comandos controlam a placa depois de compilar e enviar; a execução comum no computador não simula sensores.
+
+Esta referência corresponde à **versão 0.1.5**. Os instaladores 0.1.4 e anteriores não incluem todos os novos comandos de sensores.
 
 ## Entradas e saídas
 
-| Nome original | Alias | Parâmetros e resultado |
-| --- | --- | --- |
-| `pinMode` | `modo_pino` | pino, modo; configura entrada ou saída |
-| `digitalWrite` | `escrever_digital` | pino, nível; define `ALTO` ou `BAIXO` |
-| `digitalRead` | `ler_digital` | pino; retorna o nível digital |
-| `analogRead` | `ler_analogico` | pino ADC; retorna uma leitura inteira |
-| `touchRead` | `ler_toque` | GPIO com sensor capacitivo; retorna uma leitura inteira no ESP32 clássico |
-| `analogWrite` | `escrever_analogico` | pino PWM, valor; controla a razão cíclica |
+| Chamada em Portugol | Resultado ou efeito |
+| --- | --- |
+| `modo_pino(pino, modo)` | configura `SAIDA`, `ENTRADA` ou `ENTRADA_BOTAO` |
+| `escrever_digital(pino, LIGADO)` | escreve HIGH; use `DESLIGADO` para LOW |
+| `ler_entrada(pino)` | retorna o nível digital, `LIGADO` ou `DESLIGADO` |
+| `ler_analogico(pino)` | retorna o valor ADC bruto |
+| `escrever_analogico(pino, valor)` | gera PWM em pino compatível |
+| `ler_toque(pino)` | retorna a leitura capacitiva de GPIO tátil do ESP32 clássico |
+| `ler_pir(pino)` | lê o nível digital de um módulo PIR |
+| `ler_umidade_solo(pino)` | lê o valor ADC bruto de um sensor analógico de solo |
 
-Exemplos de chamadas isoladas, para consultar a sintaxe:
+O primeiro argumento de `escrever_digital` continua sendo o pino: `escrever_digital(18, LIGADO)`. As constantes descrevem o nível elétrico. Em módulos com acionamento invertido, HIGH não significa necessariamente carga acionada.
 
-```text
-Arduino.modo_pino(13, SAIDA)
-Arduino.escrever_digital(13, ALTO)
-inteiro estado = Arduino.ler_digital(2)
-inteiro leitura = Arduino.ler_analogico(A0)
-inteiro toque = Arduino.ler_toque(4)
-Arduino.escrever_analogico(9, 128)
-```
+`ler_umidade_solo` não devolve uma porcentagem. Calibre referências seca e úmida e converta com `mapear`, conforme **ESP32: umidade do solo e calibração**. `ler_pir` não mede distância nem identifica pessoas.
 
-`analogWrite` gera PWM nos exemplos deste guia, não uma tensão analógica contínua. O pino precisa oferecer a função na placa escolhida. No Uno, use um dos pinos `3`, `5`, `6`, `9`, `10` ou `11` para PWM.
+`escrever_analogico` produz PWM, não uma tensão analógica contínua. No Uno, os pinos PWM usuais são 3, 5, 6, 9, 10 e 11. Os pinos e recursos disponíveis no ESP32 dependem do chip e da placa.
 
-`ler_toque(pino)` é traduzida para `touchRead(pino)`. No ESP32 clássico, a leitura normalmente cai ao tocar no eletrodo; compare o valor com um limiar calibrado na sua montagem. A função retorna uma medição bruta, não um valor lógico. Ela não está disponível no Arduino Uno. Veja **ESP32 Dev Module > ESP32: sensor de toque capacitivo** para o programa completo, pinagem e calibração.
+`ler_toque` recebe o **GPIO**, não o canal: T0 do ESP32 clássico corresponde ao GPIO 4. O valor normalmente cai ao tocar; use um limiar calibrado. O recurso não existe no Uno e o comportamento de outras variantes ESP32 é diferente.
 
 ## Tempo e som
 
-| Nome original | Alias | Uso |
-| --- | --- | --- |
-| `delay` | `aguarde` | pausa por uma quantidade de milissegundos |
-| `delayMicroseconds` | `aguarde_microssegundos` | pausa em microssegundos |
-| `millis` | `milissegundos` | tempo desde a inicialização em milissegundos |
-| `micros` | `microssegundos` | tempo desde a inicialização em microssegundos |
-| `tone` | `tom` | pino, frequência em hertz; inicia um tom |
-| `noTone` | `parar_tom` | pino; interrompe o tom |
-
-Também são reconhecidos `delay_ms` para `delay` e `delay_us` para `delayMicroseconds`.
-
-```text
-Arduino.aguarde(1000)
-Arduino.aguarde_microssegundos(10)
-Arduino.tom(8, 440)
-Arduino.parar_tom(8)
-```
-
-`aguarde()` bloqueia a sequência de instruções durante a pausa. Para entender uma alternativa, abra **Arduino e ESP32 > ESP32 Dev Module > ESP32: temporização sem bloquear**. Esse tutorial explica o limite do tipo `inteiro` ao armazenar o retorno de `millis()`.
-
-## Operações adicionais reconhecidas
-
-| Função | Uso e observação |
+| Chamada | Efeito |
 | --- | --- |
-| `pulseIn(pino, nivel)` | mede um pulso; o retorno original é `unsigned long` |
-| `shiftOut(dados, clock, ordem, valor)` | envia um byte por dois pinos digitais |
-| `shiftIn(dados, clock, ordem)` | lê um byte por dois pinos digitais |
+| `espere(milissegundos)` | pausa a sequência em milissegundos |
+| `espere_microssegundo(microssegundos)` | pausa em microssegundos |
+| `milissegundos()` | tempo desde a inicialização, equivalente a `millis()` |
+| `microssegundos()` | tempo desde a inicialização, equivalente a `micros()` |
+| `tom(pino, frequencia)` | inicia um tom em hertz |
+| `parar_tom(pino)` | encerra o tom |
 
-Esses nomes são encaminhados ao core Arduino. O reconhecimento de uma chamada não garante que o circuito, os valores ou constantes específicas do core sejam válidos no Portugol. O gerador ainda não oferece todos os tipos e constantes da API Arduino. Comece pelos exemplos completos de GPIO, ADC, PWM e som desta ajuda.
+As pausas são bloqueantes. Para deixar o loop livre entre eventos, consulte **ESP32: temporização sem bloquear** e os limites numéricos de `inteiro`.
+
+## Servo motor
+
+| Chamada | Resultado ou efeito |
+| --- | --- |
+| `iniciar_servo(pino)` | `logico`: prepara o servo e informa sucesso |
+| `escrever_servo(pino, angulo)` | `logico`: envia posição entre 0 e 180 graus a um servo iniciado |
+| `parar_servo(pino)` | encerra o PWM; não desliga a fonte do motor |
+
+O gerador usa `ESP32Servo` no ESP32 e `Servo` no Uno. Alimente o servo por uma fonte adequada e mantenha terra comum; o GPIO conduz apenas o sinal. Verifique limites mecânicos e nível lógico do modelo. Veja o tutorial completo antes de montar.
+
+## Temperatura e umidade do ar: DHT
+
+| Chamada | Resultado ou efeito |
+| --- | --- |
+| `iniciar_dht(pino, DHT11)` ou `iniciar_dht(pino, DHT22)` | `logico`: configura pino e tipo do sensor |
+| `ler_temperatura(pino)` | `real`: graus Celsius; `NaN` se a leitura falhar |
+| `ler_umidade(pino)` | `real`: umidade relativa em porcentagem; `NaN` se falhar |
+| `leitura_valida(valor)` | `logico`: confirma que o número é finito e utilizável |
+
+Inicialize o sensor antes de ler e use o tipo correspondente ao componente real. Uma inicialização bem-sucedida não garante que a comunicação elétrica esteja correta. Confira cada leitura com `leitura_valida`; falha não deve ser confundida com temperatura ou umidade zero. Aguarde pelo menos dois segundos entre ciclos de leitura do exemplo DHT22.
+
+O preparo instala **DHT sensor library** e **Adafruit Unified Sensor**. O gerador inclui os cabeçalhos necessários automaticamente. DHT mede o ar; umidade de solo usa outro tipo de sensor.
+
+## Distância ultrassônica
+
+`ler_distancia(gatilho, eco)` retorna centímetros como `real`, com tempo limite padrão de **30000 microssegundos**. `ler_distancia(gatilho, eco, limite)` aceita de 1 a 1000000 microssegundos. O resultado é `-1` quando não há eco completo dentro do limite, quando os pinos são inválidos ou iguais, ou quando o prazo está fora dessa faixa.
+
+Configure TRIG como `SAIDA` e ECHO como `ENTRADA`. A medição espera o eco e é bloqueante durante esse período. HC-SR04 comum tem ECHO de **5 V**: adapte o nível antes do GPIO do ESP32. Consulte o tutorial com divisor de tensão.
+
+## Mapear e converter uma faixa
+
+`mapear(valor, entrada_min, entrada_max, saida_min, saida_max)` retorna `real`, preserva casas decimais e aceita limites invertidos. Os nomes `map` e `MAP` são aliases da mesma função do Dogol.
+
+- `mapear(5, 0, 10, 0, 100)` retorna 50.
+- `mapear(2.5, 0, 10, 0, 1)` retorna 0,25.
+- `mapear(15, 0, 10, 0, 100)` retorna 150: a saída não é limitada.
+- Limites de entrada iguais produzem `NaN`; teste o resultado com `leitura_valida`.
+
+A implementação do Dogol trabalha com reais. O `map()` original do Arduino C++ normalmente usa aritmética inteira; considere essa diferença ao adaptar código externo. Abra **Mapear valores entre faixas** para o programa completo.
 
 ## Constantes e pinagem
 
-| Portugol | Arduino | Significado |
+| Portugol | Core Arduino | Significado |
 | --- | --- | --- |
-| `ALTO` | `HIGH` | nível lógico alto |
-| `BAIXO` | `LOW` | nível lógico baixo |
+| `LIGADO` | `HIGH` | nível lógico alto |
+| `DESLIGADO` | `LOW` | nível lógico baixo |
 | `SAIDA` | `OUTPUT` | pino de saída |
 | `ENTRADA` | `INPUT` | pino de entrada |
-| `ENTRADA_PULLUP` | `INPUT_PULLUP` | entrada com resistor interno de elevação |
+| `ENTRADA_BOTAO` | `INPUT_PULLUP` | entrada com resistor interno de elevação |
+| `DHT11` / `DHT22` | tipo do DHT | modelo configurado do sensor |
 
-Os aliases também aceitam letras minúsculas. O analisador reconhece `A0` até `A15`, mas cada placa só possui parte desses pinos. Para o ESP32 clássico, os tutoriais usam números de GPIO, como `18`, `27` e `34`.
+Com `ENTRADA_BOTAO`, um botão entre GPIO e GND retorna `DESLIGADO` quando pressionado e `LIGADO` quando solto. O nome não inverte a leitura. Nem todo GPIO oferece pull-up: os GPIOs 34–39 do ESP32 clássico são somente entrada e não têm esse resistor interno.
 
-Com `ENTRADA_PULLUP`, o botão ligado ao GND retorna `BAIXO` quando pressionado e `ALTO` quando solto. Isso evita uma entrada flutuante sem exigir um resistor externo de pull-up.
+O analisador reconhece A0 até A15, mas só use um pino que exista na placa selecionada. Os tutoriais ESP32 usam números de GPIO. Não aplique 5 V diretamente aos GPIOs do ESP32.
 
-## Serial
+## Migração de programas anteriores
 
-O gerador prepara `Serial.begin(9600)` automaticamente. `escreva("Valor: ", valor)` envia os argumentos para `Serial.print`. Chame `escreva()` sem argumentos para encerrar a linha. No desktop, o monitor serial conecta após um envio bem-sucedido; abra a aba **Monitor serial**, ao lado de **Console**, para ver os dados; use **Monitor serial** e **Parar serial** para controlar a leitura a 9600 baud. O app pausa o monitor antes do próximo envio e retoma depois. Feche outros monitores seriais que estejam usando a mesma porta.
+| Escrita anterior | Escrita recomendada |
+| --- | --- |
+| `Arduino.ler_digital(pino)` | `ler_entrada(pino)` |
+| `Arduino.escrever_digital(pino, ALTO)` | `escrever_digital(pino, LIGADO)` |
+| `BAIXO` | `DESLIGADO` |
+| `delay(ms)` / `aguarde(ms)` | `espere(ms)` |
+| `aguarde_microssegundos(us)` | `espere_microssegundo(us)` |
+| `ENTRADA_PULLUP` | `ENTRADA_BOTAO` |
 
-`leia()` por Serial, Wi-Fi, Bluetooth e métodos de objetos de bibliotecas externas ainda não têm suporte nesta conversão. Consulte **Arduino e ESP32 > Limitações e compatibilidade** antes de adaptar um exemplo de Arduino C/C++ encontrado em outra fonte.
+O prefixo e os nomes antigos continuam aceitos para compatibilidade. Os novos exemplos ensinam a escrita direta. Os nomes C++ básicos, como `pinMode`, `digitalRead`, `pulseIn`, `shiftOut` e `shiftIn`, também podem ser reconhecidos, mas a pinagem e as assinaturas precisam ser compatíveis com a placa.
+
+## Serial e recursos fora do escopo
+
+O gerador inicia `Serial.begin(9600)`. `escreva("Valor: ", valor)` imprime argumentos em sequência; use `escreva()` para encerrar a linha. Envie para a placa e abra **Monitor serial** a 9600 baud. O monitor pausa para um novo upload e retoma depois.
+
+`leia()` pela Serial, Wi-Fi, Bluetooth e métodos arbitrários de objetos C++ ainda não têm mapeamento geral. Os novos comandos de servo e DHT são operações explicitamente suportadas; instalar uma biblioteca não torna todos os seus métodos disponíveis em Portugol.

@@ -61,3 +61,9 @@ Os GPIOs do ESP32 não toleram 5 V. Nos exemplos com potenciômetro, use a alime
 ## Antes de avançar
 
 Comece por um pisca-LED. Depois experimente botão, leitura analógica e PWM. Salve suas alterações em `.por` para repetir as experiências. Confira também **Arduino e ESP32 > Limitações e compatibilidade** para conhecer os recursos que ainda não são convertidos nesta versão.
+
+## Sintaxe e sensores da versão 0.1.5
+
+Os exemplos desta árvore já usam funções diretas, como `modo_pino`, `ler_entrada`, `escrever_digital`, `espere` e `espere_microssegundo`, sem prefixo ou inclusão da biblioteca Arduino. Consulte **Funções e constantes Arduino** para migrar programas antigos. Os comandos novos de servo, DHT, PIR, solo, ultrassônico e `mapear` estão disponíveis a partir da versão 0.1.5; os instaladores 0.1.4 e anteriores não contêm essa atualização.
+
+No preparo de DHT, o aplicativo também baixa **DHT sensor library** e **Adafruit Unified Sensor**. `Servo` é usada no Uno e `ESP32Servo` no ESP32. O cabeçalho de cada recurso é gerado automaticamente; escolha o tutorial do seu componente e confira a montagem antes de enviar.

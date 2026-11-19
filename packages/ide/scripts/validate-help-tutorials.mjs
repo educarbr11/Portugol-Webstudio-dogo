@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
+import { writeArduinoStubs } from "../../parser/scripts/arduino-test-support.mjs";
+
 import { PortugolCArduino, PortugolErrorChecker } from "../../parser/lib/index.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -126,34 +128,6 @@ function getTutorials() {
   return tutorials;
 }
 
-const arduinoHeader = `#pragma once
-#include <stdint.h>
-class String { public: String(const char* = "") {} };
-class SerialClass { public: void begin(int) {} template <typename T> void print(T) {} void println() {} };
-extern SerialClass Serial;
-#define HIGH 1
-#define LOW 0
-#define OUTPUT 1
-#define INPUT 0
-#define INPUT_PULLUP 2
-#define A0 14
-void pinMode(int, int);
-void digitalWrite(int, int);
-int digitalRead(int);
-void analogWrite(int, int);
-int analogRead(int);
-uint16_t touchRead(uint8_t);
-void delay(unsigned long);
-void delayMicroseconds(unsigned long);
-unsigned long millis();
-unsigned long micros();
-void tone(int, unsigned int);
-void noTone(int);
-unsigned long pulseIn(int, int, unsigned long = 1000000);
-void shiftOut(int, int, int, uint8_t);
-uint8_t shiftIn(int, int, int);
-`;
-
 function validatePrograms(tutorials) {
   let hasGpp = true;
   try {
@@ -167,7 +141,7 @@ function validatePrograms(tutorials) {
   let count = 0;
 
   try {
-    fs.writeFileSync(path.join(tempDir, "Arduino.h"), arduinoHeader);
+    writeArduinoStubs(tempDir);
 
     for (const { item, source, file } of tutorials) {
       const examples = getHelpContentBlocks(source, item.text).filter(block => block.example);

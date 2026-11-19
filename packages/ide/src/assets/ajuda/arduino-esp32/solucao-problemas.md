@@ -23,7 +23,7 @@ Encerre a sessão e entre novamente para aplicar a alteração. Algumas placas t
 
 - Confirme a presença de `programa`, chaves e `funcao inicio()`.
 - Confira se todas as variáveis foram declaradas e se os nomes estão escritos da mesma forma.
-- Use `Arduino.` nas funções de hardware, como `Arduino.modo_pino`.
+- Use as chamadas diretas documentadas, como `modo_pino(18, SAIDA)`.
 - Substitua `leia()` por uma leitura de pino compatível quando o objetivo for entrada de um sensor.
 - Remova bibliotecas e chamadas não documentadas em **Arduino e ESP32 > Funções e constantes Arduino**.
 - Abra um exemplo completo desta ajuda e compare uma alteração por vez.
@@ -54,7 +54,7 @@ O primeiro envio baixa índices, core e bibliotecas. Confira a conexão com a in
 
 Confira o GND comum, a polaridade do LED e o resistor em série. Use os números dos pinos da placa, sem confundir a posição física do conector com o número do GPIO. No ESP32 clássico, os GPIOs 34 a 39 são somente entrada e não oferecem pull-up interno.
 
-Para botão com `ENTRADA_PULLUP`, pressionado significa `BAIXO`. Para PWM no Uno, use um pino compatível, como o `9`. Em um potenciômetro, o terminal central deve ir à entrada analógica.
+Para botão com `ENTRADA_BOTAO`, pressionado significa `DESLIGADO`. Para PWM no Uno, use um pino compatível, como o `9`. Em um potenciômetro, o terminal central deve ir à entrada analógica.
 
 Nunca aplique 5 V aos GPIOs do ESP32. Use 3V3 nos circuitos analógicos do ESP32 e não conecte motores, relés ou cargas de alta corrente diretamente a um GPIO.
 
@@ -70,4 +70,13 @@ As leituras da placa ficam na aba **Monitor serial**; os logs de compilação e 
 
 O código gerado inicia a Serial a **9600 baud**. O boot do ESP32 usa **115200 baud** e pode aparecer ilegível em 9600; [a documentação da Espressif explica essa diferença](https://docs.espressif.com/projects/esptool/en/latest/esp32/advanced-topics/boot-mode-selection.html). Para diagnosticar o boot, desconecte o monitor, selecione 115200 e conecte novamente. Após enviar outro programa pelo Dogol, o monitor volta a 9600 automaticamente.
 
-Confira se o programa enviado contém `escreva()` dentro de `funcao loop()`. Um programa vazio pode ser enviado com sucesso, mas não produz leituras do sensor. Para acompanhar valores continuamente, use `escreva("Toque: ", leitura)`, depois `escreva()` para encerrar a linha e `Arduino.aguarde(100)` para espaçar as leituras.
+Confira se o programa enviado contém `escreva()` dentro de `funcao loop()`. Um programa vazio pode ser enviado com sucesso, mas não produz leituras do sensor. Para acompanhar valores continuamente, use `escreva("Toque: ", leitura)`, depois `escreva()` para encerrar a linha e `espere(100)` para espaçar as leituras.
+
+## Novos sensores: leitura inválida ou componente sem resposta
+
+- **Servo:** teste `iniciar_servo`, confira faixa de 0–180, fonte adequada e terra comum. O GPIO fornece sinal, não alimentação do motor.
+- **DHT:** confirme DHT11/DHT22, pinagem e pull-up a 3,3 V; espere pelo menos dois segundos entre ciclos e teste `leitura_valida` em temperatura e umidade.
+- **PIR:** confira o nível da saída e aguarde a estabilização inicial; ajuste tempo e redisparo no módulo quando necessário.
+- **Solo:** confira AO e calibre os valores seco/molhado. O retorno bruto não é uma porcentagem universal.
+- **Ultrassônico:** `-1` indica ausência de eco no prazo. Confira TRIG, ECHO, divisor de tensão e objeto; não conecte ECHO de 5 V diretamente ao ESP32.
+- **Mapeamento:** limites de entrada iguais geram `NaN`. A saída não é limitada automaticamente, e faixas invertidas são permitidas.

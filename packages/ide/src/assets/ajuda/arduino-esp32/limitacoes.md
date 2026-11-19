@@ -1,6 +1,6 @@
 # Limitações da conversão para Arduino
 
-A conversão de Portugol para C/C++ é experimental. Esta página ajuda a escolher programas compatíveis com o gerador atual.
+A conversão de Portugol para C/C++ é experimental. A nova sintaxe direta e os comandos de sensores desta ajuda estão disponíveis a partir da versão 0.1.5. Esta página ajuda a escolher programas compatíveis com o gerador atual.
 
 ## Placas disponíveis
 
@@ -16,17 +16,18 @@ O seletor da interface ainda não oferece outros modelos de Arduino ou variantes
 | Variáveis, funções, condições, laços e vetores | convertidos pelas operações documentadas em Arduino e ESP32 > Sintaxe do Portugol para placas |
 | Matrizes simples com dimensões fixas | convertidas; matrizes inicializadas e parâmetros de matriz possuem limitações |
 | Funções básicas de GPIO, ADC, PWM e tempo | reconhecidas pelos nomes e aliases da referência |
-| `Arduino.ler_toque(pino)` / `Arduino.touchRead(pino)` | leitura capacitiva nos GPIOs táteis do ESP32 clássico; indisponível no Uno |
+| `ler_toque(pino)` / `touchRead(pino)` | leitura capacitiva nos GPIOs táteis do ESP32 clássico; indisponível no Uno |
 | `escreva()` | usa Serial a 9600 baud |
 | `leia()` pela Serial | ainda não implementado no gerador |
 | Monitor serial dentro do aplicativo | recebe dados no painel Monitor serial a 9600 baud por padrão; sem envio de texto para a placa |
 | `Graficos`, arquivos e recursos do computador | não são convertidos para o microcontrolador |
 | Wi-Fi, Bluetooth e APIs específicas de ESP32 | sem mapeamento explícito |
-| Objetos de Servo, ESP32Servo e LedControl | sem mapeamento geral de objetos e métodos |
+| Servo, DHT, PIR, solo, ultrassônico e mapeamento | comandos explícitos documentados no glossário; sem mapeamento geral de objetos C++ |
+| `leitura_valida(valor)` | identifica resultado numérico inválido em DHT e mapeamento |
 
-O preparo instala `Servo` e `LedControl` para Uno, e `ESP32Servo` e `LedControl` para ESP32. A instalação não significa que comandos de objetos dessas bibliotecas já possam ser escritos e convertidos em Portugol.
+O preparo instala `Servo` e `LedControl` para Uno, e `ESP32Servo` e `LedControl` para ESP32. As duas placas também preparam `DHT sensor library` e `Adafruit Unified Sensor`. Use as chamadas de alto nível documentadas para servo e DHT; a instalação não libera métodos arbitrários dos objetos dessas bibliotecas.
 
-`inclua biblioteca ...` é registrado como comentário no C/C++ gerado. Não há uma tradução geral de bibliotecas Portugol para cabeçalhos Arduino. Não basta incluir uma biblioteca para tornar suas funções compatíveis.
+`inclua biblioteca ...` é registrado como comentário no C/C++ gerado. Não há uma tradução geral de bibliotecas Portugol para cabeçalhos Arduino. Não basta incluir uma biblioteca para tornar suas funções compatíveis. As chamadas diretas documentadas não precisam de `inclua biblioteca Arduino`; o gerador inclui Servo/ESP32Servo e DHT quando necessários.
 
 ## Tipos numéricos e memória
 
@@ -45,3 +46,9 @@ A execução comum do Portugol usa o computador; ela não simula os circuitos de
 O primeiro preparo de cada placa requer internet. Depois do preparo, os componentes ficam no diretório de dados do aplicativo. Um download interrompido pode exigir repetir o preparo com a conexão restabelecida.
 
 Se a tradução gerar trechos marcados como `TODO`, a operação correspondente não está mapeada. Reduza o programa até um exemplo conhecido desta ajuda e consulte **Arduino e ESP32 > Solução de problemas**.
+
+## Validade das leituras e recursos compartilhados
+
+DHT pode falhar e retornar `NaN`; use `leitura_valida`. `mapear` também devolve `NaN` para limites de entrada iguais, preserva decimais e não limita resultados. `ler_umidade_solo` retorna ADC bruto e exige calibração; a escala percentual do tutorial é relativa. `ler_distancia` devolve `-1` quando não há eco no prazo e bloqueia enquanto aguarda o pulso.
+
+Servos e PWM usam recursos de hardware compartilhados e precisam de GPIOs compatíveis. Inicializar um comando não valida a alimentação, os níveis elétricos nem a montagem. Os tutoriais não substituem ensaios com os componentes reais.

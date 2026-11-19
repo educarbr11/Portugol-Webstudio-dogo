@@ -23,23 +23,21 @@ O ânodo normalmente é a perna mais longa; o lado achatado do encapsulamento co
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro sensor = A0
   inteiro led_pwm = 9
 
   funcao inicio()
   {
-    Arduino.modo_pino(led_pwm, SAIDA)
+    modo_pino(led_pwm, SAIDA)
   }
 
   funcao loop()
   {
-    inteiro leitura = Arduino.ler_analogico(sensor)
+    inteiro leitura = ler_analogico(sensor)
     inteiro brilho = leitura / 4
 
-    Arduino.escrever_analogico(led_pwm, brilho)
-    Arduino.aguarde(10)
+    escrever_analogico(led_pwm, brilho)
+    espere(10)
   }
 }
 ```

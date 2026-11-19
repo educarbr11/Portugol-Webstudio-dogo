@@ -1,5 +1,7 @@
 # Sintaxe de Portugol para microcontroladores
 
+A partir da versão 0.1.5, use chamadas diretas sem `Arduino.` e sem `inclua biblioteca Arduino`. Exemplos: `modo_pino(18, SAIDA)`, `escrever_digital(18, LIGADO)`, `inteiro valor = ler_entrada(27)` e `espere(100)`. Os nomes anteriores continuam aceitos; os instaladores 0.1.4 e anteriores não incluem todos os novos comandos.
+
 Os mesmos comandos de Portugol são usados no Arduino Uno e no ESP32. A opção **Placa** define o core que compila o C/C++ gerado. Os exemplos desta página não precisam de circuito: a saída é enviada pela Serial da placa em 9600 baud.
 
 ## Estrutura e tipos
@@ -168,3 +170,9 @@ Resultado esperado: a saída é `5`. Matrizes inicializadas diretamente e parâm
 6. Abra **Monitor serial** no Dogol a 9600 baud e reinicie a placa para observar a saída de `inicio()`.
 
 `escreva()` com argumentos imprime em sequência, sem espaços ou quebra de linha automáticos. `escreva()` sem argumentos encerra a linha. O monitor integrado recebe dados na aba **Monitor serial**; `leia()` na placa e envio de texto pelo monitor ainda não estão implementados.
+
+## Sensores e conversões da versão 0.1.5
+
+O glossário **Funções e constantes Arduino** reúne as assinaturas de servo, DHT, PIR, umidade do solo, ultrassônico e `mapear`. Esses comandos podem ser usados em inicializações, atribuições e retornos de funções, respeitando os tipos documentados. Os tutoriais específicos incluem circuitos e programas completos.
+
+Para leituras DHT ou conversões que possam produzir um resultado inválido, declare `real valor` e teste `leitura_valida(valor)`. Para botão ligado ao GND com `ENTRADA_BOTAO`, pressionado corresponde a `DESLIGADO`. A escrita digital recebe pino e nível: `escrever_digital(18, LIGADO)`.

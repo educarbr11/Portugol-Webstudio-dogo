@@ -21,20 +21,18 @@ O LED deve ter resistor em série. O ESP32 trabalha com lógica de 3,3 V; não c
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro led_pwm = 18
   inteiro brilho = 0
   inteiro passo = 5
 
   funcao inicio()
   {
-    Arduino.modo_pino(led_pwm, SAIDA)
+    modo_pino(led_pwm, SAIDA)
   }
 
   funcao loop()
   {
-    Arduino.escrever_analogico(led_pwm, brilho)
+    escrever_analogico(led_pwm, brilho)
     brilho += passo
 
     se (brilho >= 255)
@@ -48,7 +46,7 @@ programa
       passo = 5
     }
 
-    Arduino.aguarde(20)
+    espere(20)
   }
 }
 ```

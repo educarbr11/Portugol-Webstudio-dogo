@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { writeArduinoStubs } from "./arduino-test-support.mjs";
+
 import { PortugolCArduino, PortugolErrorChecker } from "../lib/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,46 +23,31 @@ const requiredSnippetsByFile = {
     "int leitura_original = touchRead(4);",
     "if ((touchRead(4) < limiar))",
   ],
+  "06_sintaxe_sem_prefixo.por": [
+    "pinMode(botao, INPUT_PULLUP);",
+    "return digitalRead(botao);",
+    "estado = digitalRead(botao);",
+    "digitalWrite(led, HIGH);",
+    "digitalWrite(led, LOW);",
+    "delay(100);",
+    "delayMicroseconds(10);",
+  ],
 };
 
 fs.rmSync(buildDir, { recursive: true, force: true });
 fs.mkdirSync(buildDir, { recursive: true });
 
-const examples = fs.readdirSync(examplesDir).filter(file => file.endsWith(".por")).sort();
+const examples = fs
+  .readdirSync(examplesDir)
+  .filter(file => file.endsWith(".por"))
+  .sort();
 
 if (examples.length === 0) {
   throw new Error(`Nenhum exemplo .por encontrado em ${examplesDir}`);
 }
 
 const arduinoHeaderDir = fs.mkdtempSync(path.join(os.tmpdir(), "portugol-arduino-stub-"));
-fs.writeFileSync(
-  path.join(arduinoHeaderDir, "Arduino.h"),
-  [
-    "#pragma once",
-    "#include <stdint.h>",
-    "class String { public: String(const char* = \"\") {} };",
-    "class SerialClass { public: void begin(int) {} template <typename T> void print(T) {} void println() {} };",
-    "extern SerialClass Serial;",
-    "#define HIGH 1",
-    "#define LOW 0",
-    "#define OUTPUT 1",
-    "#define INPUT 0",
-    "#define INPUT_PULLUP 2",
-    "void pinMode(int, int);",
-    "void digitalWrite(int, int);",
-    "int digitalRead(int);",
-    "void analogWrite(int, int);",
-    "int analogRead(int);",
-    "uint16_t touchRead(uint8_t);",
-    "void delay(unsigned long);",
-    "void delayMicroseconds(unsigned long);",
-    "unsigned long millis();",
-    "unsigned long micros();",
-    "void tone(int, unsigned int);",
-    "void noTone(int);",
-    "",
-  ].join("\n"),
-);
+writeArduinoStubs(arduinoHeaderDir);
 
 let hasGpp = true;
 

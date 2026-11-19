@@ -23,33 +23,31 @@ O GPIO 34 do ESP32 clássico é uma entrada ADC e não é saída. Não possui pu
 ```portugol
 programa
 {
-  inclua biblioteca Arduino
-
   inteiro sensor = 34
   inteiro led = 18
 
   funcao inicio()
   {
-    Arduino.modo_pino(sensor, ENTRADA)
-    Arduino.modo_pino(led, SAIDA)
+    modo_pino(sensor, ENTRADA)
+    modo_pino(led, SAIDA)
   }
 
   funcao loop()
   {
-    inteiro leitura = Arduino.ler_analogico(sensor)
+    inteiro leitura = ler_analogico(sensor)
 
     se (leitura >= 2048)
     {
-      Arduino.escrever_digital(led, ALTO)
+      escrever_digital(led, LIGADO)
     }
     senao
     {
-      Arduino.escrever_digital(led, BAIXO)
+      escrever_digital(led, DESLIGADO)
     }
 
     escreva("ADC: ", leitura)
     escreva()
-    Arduino.aguarde(250)
+    espere(250)
   }
 }
 ```
