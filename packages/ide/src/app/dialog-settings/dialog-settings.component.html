@@ -1,80 +1,137 @@
-<header mat-dialog-title>
-  <span>Configurações</span>
-  <s></s>
-  <button tabindex="-1" type="button" mat-dialog-close mat-icon-button aria-label="Fechar diálogo">
+<header class="settings-header">
+  <div class="settings-heading">
+    <span class="heading-icon">
+      <svg-icon src="assets/mdi/cog-outline.svg" aria-hidden="true" focusable="false" />
+    </span>
+    <div>
+      <h2 mat-dialog-title>Configurações</h2>
+      <p>Deixe seu espaço de programação do seu jeito.</p>
+    </div>
+  </div>
+  <button class="close-button" type="button" mat-dialog-close aria-label="Fechar configurações">
     <svg-icon src="assets/mdi/close.svg" aria-hidden="true" focusable="false" />
   </button>
 </header>
 
-<mat-dialog-content>
-  <div class="preferences">
-    <div class="preference-section">
-      <div class="preference-section-header">
-        <span>Interface</span>
+<mat-dialog-content class="settings-content">
+  <section class="settings-section" aria-labelledby="appearance-title">
+    <div class="section-heading">
+      <svg-icon src="assets/mdi/palette-outline.svg" aria-hidden="true" focusable="false" />
+      <div>
+        <h3 id="appearance-title">Aparência</h3>
+        <p id="appearance-description">Escolha o tema mais confortável para você.</p>
       </div>
-
-      <div class="preference-list">
-        <div class="preference">
-          <mat-label id="setting-interface-appearance-label">Aparência</mat-label>
-
-          <mat-radio-group
-            aria-labelledby="setting-interface-appearance-label"
-            name="theme"
-            class="radio-group"
-            color="primary"
-            [(ngModel)]="theme"
+    </div>
+    <div
+      class="theme-options"
+      role="radiogroup"
+      aria-labelledby="appearance-title"
+      aria-describedby="appearance-description"
+    >
+      <label class="theme-option" [class.selected]="theme === 'auto'">
+        <input type="radio" name="theme" value="auto" [(ngModel)]="theme" />
+        <span class="theme-preview theme-preview-auto" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="theme-caption">
+          <span class="theme-name"
+            ><svg-icon src="assets/mdi/monitor.svg" aria-hidden="true" focusable="false" />Sistema</span
           >
-            <mat-radio-button value="auto">Automático (sistema)</mat-radio-button>
-            <mat-radio-button value="light">Claro</mat-radio-button>
-            <mat-radio-button value="dark">Escuro</mat-radio-button>
-          </mat-radio-group>
-        </div>
+          <span class="theme-note">Automático</span>
+        </span>
+        <span class="theme-check" aria-hidden="true"><svg-icon src="assets/mdi/check.svg" focusable="false" /></span>
+      </label>
+      <label class="theme-option" [class.selected]="theme === 'light'">
+        <input type="radio" name="theme" value="light" [(ngModel)]="theme" />
+        <span class="theme-preview theme-preview-light" aria-hidden="true"
+          ><span></span><span></span><span></span
+        ></span>
+        <span class="theme-caption">
+          <span class="theme-name"
+            ><svg-icon src="assets/mdi/white-balance-sunny.svg" aria-hidden="true" focusable="false" />Claro</span
+          >
+          <span class="theme-note">Mais luminosidade</span>
+        </span>
+        <span class="theme-check" aria-hidden="true"><svg-icon src="assets/mdi/check.svg" focusable="false" /></span>
+      </label>
+      <label class="theme-option" [class.selected]="theme === 'dark'">
+        <input type="radio" name="theme" value="dark" [(ngModel)]="theme" />
+        <span class="theme-preview theme-preview-dark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="theme-caption">
+          <span class="theme-name"
+            ><svg-icon src="assets/mdi/moon-waning-crescent.svg" aria-hidden="true" focusable="false" />Escuro</span
+          >
+          <span class="theme-note">Menos luminosidade</span>
+        </span>
+        <span class="theme-check" aria-hidden="true"><svg-icon src="assets/mdi/check.svg" focusable="false" /></span>
+      </label>
+    </div>
+  </section>
+
+  <section class="settings-section editor-settings" aria-labelledby="editor-title">
+    <div class="section-heading">
+      <svg-icon src="assets/mdi/format-size.svg" aria-hidden="true" focusable="false" />
+      <div>
+        <h3 id="editor-title">Editor</h3>
+        <p>Ajuste a leitura do código e do console.</p>
       </div>
     </div>
-
-    <div class="preference-section">
-      <div class="preference-section-header">
-        <span>Editor</span>
-      </div>
-
-      <div class="preference-list">
-        <div class="preference">
-          <mat-label id="setting-editor-font-size-label">Tamanho da fonte</mat-label>
-
-          <div class="preference-slider">
-            <mat-slider
-              aria-labelledby="setting-editor-font-size-label"
-              min="6"
-              max="48"
-              step="1"
-              showTickMarks
-              color="primary"
-            >
-              <input aria-labelledby="setting-editor-font-size-label" matSliderThumb [(ngModel)]="editorFontSize" />
-            </mat-slider>
-
-            <span class="slider-value slider-value-fix-width">{{ editorFontSize }}</span>
-          </div>
+    <div class="font-setting">
+      <div class="setting-label">
+        <div>
+          <label for="editor-font-size">Tamanho da fonte</label>
+          <p id="font-size-description">A alteração aparece na prévia abaixo.</p>
         </div>
-
-        <div class="preference">
-          <mat-label id="setting-editor-word-wrap-label">Quebra de linha</mat-label>
-
-          <div class="preference-switch">
-            <mat-slide-toggle
-              aria-labelledby="setting-editor-word-wrap-label"
-              color="primary"
-              [(ngModel)]="editorWordWrap"
-            >
-              {{ editorWordWrap ? "Ativado" : "Desativado" }}
-            </mat-slide-toggle>
-          </div>
-        </div>
+        <output for="editor-font-size">{{ editorFontSize }} <span>px</span></output>
       </div>
+      <input
+        id="editor-font-size"
+        class="font-slider"
+        type="range"
+        min="6"
+        max="48"
+        step="1"
+        aria-describedby="font-size-description"
+        [(ngModel)]="editorFontSize"
+      />
+      <div class="range-labels" aria-hidden="true"><span>A</span><span>A</span></div>
     </div>
-
-    <div class="preference-footer">
-      <button type="button" mat-stroked-button (click)="resetDefaults()">Restaurar padrões</button>
+    <label class="wrap-setting" for="editor-word-wrap">
+      <span>
+        <span class="setting-name">Quebra de linha automática</span>
+        <span class="setting-description" id="word-wrap-description"
+          >Mostra linhas longas sem precisar rolar para os lados.</span
+        >
+      </span>
+      <span class="toggle">
+        <input
+          id="editor-word-wrap"
+          type="checkbox"
+          aria-describedby="word-wrap-description"
+          [(ngModel)]="editorWordWrap"
+        />
+        <span class="toggle-track" aria-hidden="true"></span>
+      </span>
+    </label>
+    <div class="editor-preview">
+      <div class="preview-heading">
+        <span>Prévia do editor</span><span>{{ editorFontSize }} px</span>
+      </div>
+      <!-- eslint-disable-next-line @angular-eslint/template/no-inline-styles -- The preview follows the saved font-size preference. -->
+      <pre
+        tabindex="0"
+        aria-label="Prévia do tamanho da fonte no código"
+        [class.preview-wrap]="editorWordWrap"
+        [style.font-size.px]="editorFontSize"
+      ><code><span class="preview-keyword">funcao</span> inicio() {{ '{' }}
+  <span class="preview-function">escreva</span>(<span class="preview-string">"Olá, mundo!"</span>)
+{{ '}' }}</code></pre>
     </div>
-  </div>
+  </section>
 </mat-dialog-content>
+
+<footer class="settings-footer">
+  <button class="reset-button" type="button" (click)="resetDefaults()">Restaurar padrões</button>
+  <div class="footer-actions">
+    <span>Alterações salvas automaticamente</span>
+    <button class="done-button" type="button" mat-dialog-close>Concluído</button>
+  </div>
+</footer>

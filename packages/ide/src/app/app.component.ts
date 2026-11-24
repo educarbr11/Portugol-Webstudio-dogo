@@ -43,7 +43,7 @@ export class AppComponent implements OnInit, OnDestroy {
       key: "ctrl + q",
       preventDefault: true,
       command: () => {
-        this.closeTab(this.tabs[this.selected.value ?? 0]);
+        this.closeTab(this.tabs[(this.selected.value ?? 0) - 1]);
       },
     },
     {
@@ -93,16 +93,25 @@ export class AppComponent implements OnInit, OnDestroy {
     this.gaService.event("new_tab_top", "Editor", "Nova aba", this.tabs.length);
   }
 
-  closeTab(tab: Tab) {
+  closeTab(tab?: Tab) {
+    if (!tab) return;
     const confirmClose = () => {
-      this.tabs.splice(this.tabs.indexOf(tab), 1);
-      this.selected.setValue(0);
+      const index = this.tabs.indexOf(tab);
+      if (index === -1) return;
+      const selectedIndex = this.selected.value ?? 0;
+      this.tabs.splice(index, 1);
+      if (selectedIndex >= index + 1) {
+        this.selected.setValue(Math.max(0, selectedIndex - 1));
+      }
       this.gaService.event("close_tab", "Interface", "Fechar aba", this.tabs.length);
     };
 
     if (tab.type === "editor") {
       this.closeDialogRef = this.dialog.open(DialogConfirmCloseTabComponent, {
         data: { title: tab.title },
+        panelClass: "pws-dialog",
+        width: "460px",
+        maxWidth: "94vw",
       });
 
       this.closeDialogRef.afterClosed().subscribe(result => {
@@ -126,6 +135,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.renameDialogRef = this.dialog.open(DialogRenameTabComponent, {
       data: { title: tab.title },
+      panelClass: "pws-dialog",
+      width: "460px",
+      maxWidth: "94vw",
     });
 
     this.renameDialogSubscription = this.renameDialogRef.afterClosed().subscribe(result => {
@@ -157,6 +169,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   openSettingsModal() {
     this.gaService.event("open_settings_modal", "Interface", "Abrir modal de configurações");
-    this.dialog.open(DialogSettingsComponent);
+    this.dialog.open(DialogSettingsComponent, {
+      panelClass: ["pws-dialog", "pws-settings-dialog"],
+      width: "760px",
+      maxWidth: "94vw",
+      maxHeight: "90dvh",
+      ariaLabel: "Configurações",
+    });
   }
 }

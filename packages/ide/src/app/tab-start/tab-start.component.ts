@@ -71,8 +71,11 @@ export class TabStartComponent {
     this.gaService.event("open_examples_dialog", "Aba Inicial", "Abrir diálogo de exemplos");
 
     const ref = this.dialog.open(DialogOpenExampleComponent, {
-      width: "min(85vw, 780px)",
-      height: "min(85vh, 600px)",
+      width: "min(1120px, 94vw)",
+      maxWidth: "94vw",
+      height: "min(780px, 90vh)",
+      panelClass: ["pws-dialog", "pws-examples-dialog"],
+      ariaLabel: "Exemplos de programas",
     });
 
     this._dialogExample$ = ref.componentInstance.exampleOpened.subscribe(example => {
@@ -101,6 +104,8 @@ export class TabStartComponent {
     this.gaService.event("open_about_dialog", "Aba Inicial", "Abrir diálogo Sobre");
     this.dialog.open(DialogAboutComponent, {
       maxHeight: "85vh",
+      maxWidth: "94vw",
+      panelClass: ["pws-dialog"],
     });
   }
 }

@@ -4,7 +4,7 @@
 // Fonte //
 ///////////
 
-$font-family: "Lato", sans-serif !default;
+$font-family: "Lato", "Segoe UI", system-ui, sans-serif !default;
 
 //////////////////////
 // Cores Principais //
@@ -19,7 +19,7 @@ $theme-colors: (
   "primary": $primary,
   "secondary": $secondary,
   "blue": $blue,
-  "red": $red
+  "red": $red,
 ) !default;
 
 /////////////////////
@@ -33,23 +33,23 @@ $foreground-300: #64748b !default;
 $theme-text-colors: (
   "100": $foreground-100,
   "200": $foreground-200,
-  "300": $foreground-300
+  "300": $foreground-300,
 ) !default;
 
-$body-color: #000 !default;
+$body-color: #182234 !default;
 
 ////////////////////
 // Cores de Fundo //
 ////////////////////
 
-$background-100: #f8fafc !default;
-$background-200: #eaf0f8 !default;
-$background-300: #d7e1ee !default;
+$background-100: #f5f7fb !default;
+$background-200: #ffffff !default;
+$background-300: #edf1f7 !default;
 
 $theme-background-colors: (
   "100": $background-100,
   "200": $background-200,
-  "300": $background-300
+  "300": $background-300,
 ) !default;
 
 $body-bg: $background-100 !default;
@@ -129,5 +129,5 @@ $theme: (
   "$font-family": $font-family,
   "$body-bg": $body-bg,
   "$body-color": $body-color,
-  "$border-color": $border-color
+  "$border-color": $border-color,
 );

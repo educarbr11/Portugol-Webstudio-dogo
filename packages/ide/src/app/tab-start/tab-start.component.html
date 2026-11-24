@@ -1,97 +1,162 @@
-<svg-icon svgClass="logo w-100" svgAriaLabel="Logomarca do Portugol Webstudio" [src]="logo" />
+<div class="start-page">
+  <header class="start-header">
+    <div class="brand-row">
+      <svg-icon class="brand-logo" svgAriaLabel="Logomarca do Portugol Webstudio" [src]="logo" />
+      <span class="workspace-label">Portugol · Arduino · ESP32</span>
+    </div>
+    <p class="eyebrow">Vamos programar</p>
+    <h1>Seu próximo programa começa aqui.</h1>
+    <p class="start-description">Crie em Portugol, aprenda com exemplos e leve suas ideias para a placa.</p>
+  </header>
 
-<nav>
-  <button mat-ripple type="button" aria-labelledby="button-new-file-label" (click)="newTab.emit(undefined)">
-    <svg-icon src="assets/mdi/file-plus-outline.svg" svgClass="text-secondary" aria-hidden="true" focusable="false" />
-    <span id="button-new-file-label">Novo Arquivo</span>
-  </button>
+  <nav class="start-actions" aria-label="Começar um programa">
+    <button
+      mat-ripple
+      type="button"
+      class="action-card action-card--primary"
+      aria-labelledby="button-new-file-label"
+      aria-describedby="button-new-file-description"
+      (click)="newTab.emit(undefined)"
+    >
+      <span class="action-icon"
+        ><svg-icon src="assets/mdi/file-plus-outline.svg" aria-hidden="true" focusable="false"
+      /></span>
+      <span class="action-content">
+        <span class="action-heading"><strong id="button-new-file-label">Novo Arquivo</strong><kbd>Ctrl + N</kbd></span>
+        <span id="button-new-file-description" class="action-description"
+          >Uma página em branco para sua próxima ideia.</span
+        >
+      </span>
+      <svg-icon class="action-arrow" src="assets/mdi/arrow-top-right.svg" aria-hidden="true" focusable="false" />
+    </button>
 
-  <button mat-ripple type="button" aria-labelledby="button-open-file-label" (click)="fileInput.click()">
-    <svg-icon src="assets/mdi/folder-open-outline.svg" svgClass="text-primary" aria-hidden="true" focusable="false" />
-    <span id="button-open-file-label">Abrir Arquivo</span>
-    <input #fileInput type="file" hidden multiple accept=".por,text/plain" (change)="openFile($event)" />
-  </button>
+    <button
+      mat-ripple
+      type="button"
+      class="action-card"
+      aria-labelledby="button-open-file-label"
+      aria-describedby="button-open-file-description"
+      (click)="fileInput.click()"
+    >
+      <span class="action-icon"
+        ><svg-icon src="assets/mdi/folder-open-outline.svg" aria-hidden="true" focusable="false"
+      /></span>
+      <span class="action-content">
+        <strong id="button-open-file-label">Abrir Arquivo</strong>
+        <span id="button-open-file-description" class="action-description"
+          >Continue um programa salvo no seu computador.</span
+        >
+      </span>
+      <svg-icon class="action-arrow" src="assets/mdi/arrow-top-right.svg" aria-hidden="true" focusable="false" />
+    </button>
 
-  <button mat-ripple type="button" aria-labelledby="button-open-example-label" (click)="openExamplesDialog()">
-    <svg-icon
-      src="assets/mdi/book-open-page-variant-outline.svg"
-      svgClass="text-primary"
-      aria-hidden="true"
-      focusable="false"
-    />
+    <button
+      mat-ripple
+      type="button"
+      class="action-card"
+      aria-labelledby="button-open-example-label"
+      aria-describedby="button-open-example-description"
+      (click)="openExamplesDialog()"
+    >
+      <span class="action-icon"
+        ><svg-icon src="assets/mdi/book-open-page-variant-outline.svg" aria-hidden="true" focusable="false"
+      /></span>
+      <span class="action-content">
+        <strong id="button-open-example-label">Abrir Exemplo</strong>
+        <span id="button-open-example-description" class="action-description"
+          >Explore programas prontos e experimente mudanças.</span
+        >
+      </span>
+      <svg-icon class="action-arrow" src="assets/mdi/arrow-top-right.svg" aria-hidden="true" focusable="false" />
+    </button>
 
-    <span id="button-open-example-label">Abrir Exemplo</span>
-  </button>
+    <button
+      mat-ripple
+      type="button"
+      class="action-card"
+      aria-labelledby="button-help-label"
+      aria-describedby="button-help-description"
+      (click)="help.emit()"
+    >
+      <span class="action-icon"
+        ><svg-icon src="assets/mdi/help-circle-outline.svg" aria-hidden="true" focusable="false"
+      /></span>
+      <span class="action-content">
+        <strong id="button-help-label">Ajuda</strong>
+        <span id="button-help-description" class="action-description"
+          >Encontre a sintaxe, as bibliotecas e os tutoriais.</span
+        >
+      </span>
+      <svg-icon class="action-arrow" src="assets/mdi/arrow-top-right.svg" aria-hidden="true" focusable="false" />
+    </button>
+  </nav>
+  <input #fileInput type="file" hidden multiple accept=".por,text/plain" (change)="openFile($event)" />
 
-  <button mat-ripple type="button" aria-labelledby="button-help-label" (click)="help.emit()">
-    <svg-icon src="assets/mdi/help.svg" svgClass="text-blue" />
-    <span id="button-help-label">Ajuda</span>
-  </button>
+  <section class="learning-section" aria-labelledby="learning-title">
+    <div class="section-heading">
+      <h2 id="learning-title">Um bom lugar para começar</h2>
+      <span>Do primeiro comando aos sensores</span>
+    </div>
+    <div class="learning-grid">
+      <article class="learning-card">
+        <span class="learning-icon"
+          ><svg-icon src="assets/mdi/code-braces.svg" aria-hidden="true" focusable="false"
+        /></span>
+        <div>
+          <h3>Seu primeiro programa</h3>
+          <p>
+            Crie um arquivo, escreva um comando dentro de <code>inicio()</code> e execute para ver o resultado no
+            console.
+          </p>
+          <div class="code-preview"><span>01</span><code>escreva("Olá, mundo!")</code></div>
+        </div>
+      </article>
+      <article class="learning-card learning-card--hardware">
+        <span class="learning-icon"><svg-icon src="assets/mdi/chip.svg" aria-hidden="true" focusable="false" /></span>
+        <div>
+          <div class="learning-card-heading">
+            <h3>Arduino e ESP32</h3>
+            <span class="topic-count">21 tutoriais</span>
+          </div>
+          <p>
+            Aprenda a montar circuitos, controlar componentes e acompanhar leituras de sensores com os guias integrados.
+          </p>
+          <button type="button" class="text-action" (click)="help.emit()">
+            Explorar tutoriais<svg-icon src="assets/mdi/arrow-right.svg" aria-hidden="true" focusable="false" />
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
 
-  <a
-    href="https://github.com/dgadelha/Portugol-Webstudio/discussions/categories/ideias-e-sugest%C3%B5es"
-    target="_blank"
-    rel="external noreferrer noopener nofollow"
-    mat-ripple
-    aria-labelledby="button-suggestions-label"
-    (click)="gaService.event('suggest_features', 'Aba Inicial', 'Enviar sugestões')"
-  >
-    <svg-icon
-      src="assets/mdi/lightbulb-on-outline.svg"
-      svgClass="text-secondary"
-      aria-hidden="true"
-      focusable="false"
-    />
-
-    <span id="button-suggestions-label">Sugestões</span>
-  </a>
-
-  <a
-    href="https://github.com/dgadelha/Portugol-Webstudio/discussions/categories/d%C3%BAvidas-perguntas"
-    target="_blank"
-    rel="external noreferrer noopener nofollow"
-    mat-ripple
-    aria-labelledby="button-ask-questions-label"
-    (click)="gaService.event('ask_questions', 'Aba Inicial', 'Enviar dúvidas')"
-  >
-    <svg-icon src="assets/mdi/comment-question-outline.svg" svgClass="text-blue" aria-hidden="true" focusable="false" />
-    <span id="button-ask-questions-label">Dúvidas e Perguntas</span>
-  </a>
-
-  <button
-    mat-ripple
-    class="with-badge-new"
-    type="button"
-    aria-labelledby="button-settings-label"
-    (click)="openSettingsDialog()"
-  >
-    <svg-icon src="assets/mdi/cog-outline.svg" svgClass="text-primary" aria-hidden="true" focusable="false" />
-    <span id="button-settings-label">Configurações</span>
-  </button>
-
-  <button
-    mat-ripple
-    class="with-badge-new"
-    type="button"
-    aria-labelledby="button-about-label"
-    (click)="openAboutDialog()"
-  >
-    <svg-icon src="assets/mdi/information-outline.svg" svgClass="text-blue" aria-hidden="true" focusable="false" />
-
-    <span id="button-about-label">Sobre</span>
-  </button>
-</nav>
-
-<section class="info">
-  <h4><svg-icon src="assets/mdi/newspaper.svg" aria-hidden="true" focusable="false" />Novidades</h4>
-  <p><strong>18/02/2025:</strong> Documentação de Bibliotecas na seção Ajuda</p>
-  <p><strong>09/02/2025:</strong> Refatoração/correção de variáveis por referência.</p>
-  <p>
-    <strong>08/02/2025:</strong> Implementação da biblioteca <code>Graficos</code> e correção na execução de operações
-    lógicas.
-  </p>
-</section>
-
-<footer>
-  <summary>Versão: <span matTooltip="%DATE%">%COMMIT_SHA%</span></summary>
-</footer>
+  <footer class="start-footer">
+    <nav class="secondary-actions" aria-label="Preferências e comunidade">
+      <button type="button" (click)="openSettingsDialog()">
+        <svg-icon src="assets/mdi/cog-outline.svg" aria-hidden="true" focusable="false" />Configurações
+      </button>
+      <button type="button" (click)="openAboutDialog()">
+        <svg-icon src="assets/mdi/information-outline.svg" aria-hidden="true" focusable="false" />Sobre
+      </button>
+      <a
+        href="https://github.com/dgadelha/Portugol-Webstudio/discussions/categories/ideias-e-sugest%C3%B5es"
+        target="_blank"
+        rel="external noreferrer noopener nofollow"
+        (click)="gaService.event('suggest_features', 'Aba Inicial', 'Enviar sugestões')"
+        ><svg-icon src="assets/mdi/lightbulb-on-outline.svg" aria-hidden="true" focusable="false" />Sugestões<span
+          class="visually-hidden"
+        >
+          (abre em nova aba)</span
+        ></a
+      >
+      <a
+        href="https://github.com/dgadelha/Portugol-Webstudio/discussions/categories/d%C3%BAvidas-perguntas"
+        target="_blank"
+        rel="external noreferrer noopener nofollow"
+        (click)="gaService.event('ask_questions', 'Aba Inicial', 'Enviar dúvidas')"
+        ><svg-icon src="assets/mdi/comment-question-outline.svg" aria-hidden="true" focusable="false" />Dúvidas e
+        Perguntas<span class="visually-hidden"> (abre em nova aba)</span></a
+      >
+    </nav>
+    <span class="build-label">Versão <span matTooltip="%DATE%">%COMMIT_SHA%</span></span>
+  </footer>
+</div>

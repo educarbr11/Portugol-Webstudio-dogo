@@ -16,6 +16,7 @@
 .editor-inner {
   background-color: var(--pws-bg-100);
   flex-grow: 1;
+  min-width: 0;
   display: flex;
 
   as-split-area {
@@ -30,10 +31,14 @@
 .sidebar {
   display: flex;
   flex-direction: column;
+  flex: 0 0 7rem;
+  gap: 0.15rem;
   height: 100%;
-  width: 5rem;
+  width: 7rem;
+  padding: 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
   background-color: var(--pws-bg-200);
   border-right: 1px solid var(--pws-border-color);
 }
@@ -47,19 +52,23 @@
 
 .output-tabs {
   display: flex;
+  gap: 0.25rem;
+  padding: 0.3rem 0.6rem;
   background: var(--pws-bg-200);
   border-bottom: 1px solid var(--pws-border-color);
 
   button {
-    padding: 0.3rem 0.75rem;
-    border: none;
-    border-bottom: 2px solid transparent;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
     background: transparent;
     color: var(--pws-text-200);
+    font-size: 0.76rem;
     cursor: pointer;
 
     &[aria-selected="true"] {
-      border-bottom-color: var(--pws-color-primary);
+      border-color: var(--pws-border-color);
+      background: var(--pws-bg-300);
       color: var(--pws-text-100);
     }
   }
@@ -82,14 +91,21 @@ app-serial-monitor {
 .sidebar-button {
   appearance: none;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background-color: var(--pws-bg-200);
+  min-height: 42px;
+  padding: 0.65rem;
+  border-radius: var(--pws-radius-sm);
+  background: transparent;
   color: var(--pws-text-200);
   border: none;
   transition: all 0.2s ease;
   cursor: pointer;
+
+  &:first-child {
+    background: rgba(var(--pws-color-secondary-rgb), 0.1);
+  }
 
   &:hover:not(:disabled) {
     background-color: var(--pws-bg-300);
@@ -98,7 +114,8 @@ app-serial-monitor {
 
   &:disabled {
     cursor: not-allowed;
-    pointer-events: none;
+    opacity: 0.45;
+    pointer-events: auto;
 
     svg {
       filter: grayscale(1);
@@ -117,9 +134,11 @@ app-serial-monitor {
 .arduino-controls {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.5rem;
-  background-color: var(--pws-bg-100);
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  padding: 0.65rem 0;
+  background: transparent;
+  border: 0;
   border-top: 1px solid var(--pws-border-color);
   border-bottom: 1px solid var(--pws-border-color);
 
@@ -131,7 +150,9 @@ app-serial-monitor {
 
   span {
     color: var(--pws-text-300);
-    font-size: 0.65rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     line-height: 1;
     text-transform: uppercase;
   }
@@ -142,9 +163,10 @@ app-serial-monitor {
     color-scheme: dark;
     width: 100%;
     min-width: 0;
-    padding: 0.25rem 1.2rem 0.25rem 0.35rem;
+    min-height: 32px;
+    padding: 0.4rem 1.2rem 0.4rem 0.35rem;
     border: 1px solid var(--pws-border-color);
-    border-radius: 4px;
+    border-radius: 7px;
     background-color: var(--pws-bg-200);
     background-image:
       linear-gradient(45deg, transparent 50%, currentColor 50%),
@@ -188,11 +210,14 @@ app-serial-monitor {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 2rem;
-  border: none;
-  border-radius: 4px;
+  min-height: 34px;
+  padding: 0.4rem;
+  border: 1px solid var(--pws-border-color);
+  border-radius: 7px;
   background-color: var(--pws-bg-300);
   color: var(--pws-text-200);
+  font-size: 0.72rem;
+  line-height: 1.25;
   cursor: pointer;
 
   &:hover:not(:disabled) {
@@ -211,12 +236,14 @@ app-serial-monitor {
 }
 
 .arduino-upload {
-  background-color: var(--pws-color-red);
-  color: #ffffff;
+  border-color: transparent;
+  background: var(--pws-color-primary);
+  color: var(--pws-on-accent);
 
   &:hover:not(:disabled) {
     background-color: var(--pws-color-primary);
-    color: #101827;
+    color: var(--pws-on-accent);
+    filter: brightness(1.06);
   }
 }
 
@@ -276,5 +303,13 @@ app-serial-monitor {
       width: 1rem;
       height: 1rem;
     }
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    flex-basis: 5.5rem;
+    width: 5.5rem;
+    padding: 0.3rem;
   }
 }

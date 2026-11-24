@@ -7,11 +7,21 @@
 
 $theme-modes: (
   "light": theme-light.$theme,
-  "dark": theme-dark.$theme
+  "dark": theme-dark.$theme,
 );
 
 @each $key, $theme in $theme-modes {
   [data-theme="#{$key}"] {
+    --pws-color-scheme: #{$key};
+    --pws-radius: 12px;
+    --pws-radius-sm: 8px;
+    --pws-radius-lg: 20px;
+    --pws-surface-raised: var(--pws-bg-200);
+    --pws-on-accent: #1b190f;
+    --pws-shadow: 0 12px 36px rgba(2, 8, 23, 0.14);
+    --pws-shadow-dialog: 0 28px 90px rgba(2, 8, 23, 0.35);
+    --pws-focus-ring: 0 0 0 3px rgba(var(--pws-color-secondary-rgb), 0.2);
+
     @each $key, $value in map.get($theme, "$theme-colors") {
       --pws-color-#{$key}: #{$value};
       --pws-color-#{$key}-rgb: #{utils.to-rgb($value)};

@@ -1,4 +1,4 @@
-<ng-keyboard-shortcuts [shortcuts]="shortcuts" />
+<ng-keyboard-shortcuts [shortcuts]="shortcuts" [disabled]="!active" />
 
 <div class="sidebar">
   <button
@@ -27,7 +27,11 @@
     <div class="arduino-controls">
       <label>
         <span>Placa</span>
-        <select [disabled]="executor.running || transpiling || uploadingToBoard" [(ngModel)]="selectedBoardId">
+        <select
+          aria-label="Placa de desenvolvimento"
+          [disabled]="executor.running || transpiling || uploadingToBoard"
+          [(ngModel)]="selectedBoardId"
+        >
           @for (board of arduinoBoards; track board.id) {
             <option [value]="board.id">{{ board.label }}</option>
           }
@@ -37,6 +41,8 @@
       <label>
         <span>Porta</span>
         <select
+          aria-label="Porta serial da placa"
+          [title]="selectedPort || 'Nenhuma porta disponível'"
           [disabled]="
             executor.running || transpiling || uploadingToBoard || loadingPorts || serialBusy || serialMonitoring
           "
@@ -79,15 +85,7 @@
         type="button"
         class="arduino-action"
         title="Abrir ou encerrar a recepção no painel Monitor serial"
-        [disabled]="
-          serialBusy ||
-          boardBusy ||
-          uploadingToBoard ||
-          loadingPorts ||
-          executor.running ||
-          transpiling ||
-          (!selectedPort && !serialMonitoring)
-        "
+        [disabled]="serialMonitorDisabled"
         (click)="toggleSerialMonitor()"
       >
         {{ serialMonitoring ? "Parar serial" : "Monitor serial" }}
@@ -98,15 +96,7 @@
         type="button"
         class="arduino-action arduino-upload"
         title="Enviar para placa"
-        [disabled]="
-          executor.running ||
-          transpiling ||
-          uploadingToBoard ||
-          loadingPorts ||
-          serialBusy ||
-          boardBusy ||
-          !selectedPort
-        "
+        [disabled]="uploadDisabled"
         (click)="uploadArduinoCode()"
       >
         <svg-icon src="assets/mdi/upload.svg" aria-hidden="true" focusable="false" />
@@ -119,6 +109,7 @@
     type="button"
     class="sidebar-button"
     title="Parar execução"
+    aria-label="Parar execução"
     [disabled]="!executor.running && !transpiling && !uploadingToBoard"
     (click)="stopCode()"
   >

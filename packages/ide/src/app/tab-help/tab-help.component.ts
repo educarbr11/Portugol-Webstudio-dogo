@@ -23,6 +23,12 @@ import { getHelpContentBlocks, HelpContentBlock, HelpExample } from "./help-cont
 import { arduinoTutorialsTree } from "./tutoriais-arduino";
 import { TreeItem } from "./types";
 
+interface HelpSearchEntry {
+  item: TreeItem;
+  path: string;
+  searchText: string;
+}
+
 type PortugolWindow = Window & {
   portugol: { abrirExemplo(contents: string, name: string): void };
 };
@@ -57,6 +63,10 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
   loadingContent = false;
   contentError = false;
   navigationError = false;
+  searchQuery = "";
+  searchResults: HelpSearchEntry[] = [];
+  currentPath = "Arduino e ESP32";
+  private searchIndex: HelpSearchEntry[] = [];
 
   isBelowMd = false;
   isLightTheme = false;
@@ -72,13 +82,13 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
       },
     };
 
-    this.dataSource.data = [arduinoTutorialsTree, libsTree];
+    this.setNavigation([arduinoTutorialsTree, libsTree]);
     this.treeControl.expand(arduinoTutorialsTree);
     this.loadItem(arduinoTutorialsTree);
 
     this.helpTree$ = this.http.get<TreeItem[]>("assets/recursos/ajuda/scripts/topicos.json").subscribe({
       next: ajuda => {
-        this.dataSource.data = [arduinoTutorialsTree, ...ajuda, libsTree];
+        this.setNavigation([arduinoTutorialsTree, ...ajuda, libsTree]);
       },
       error: () => {
         this.navigationError = true;
@@ -107,7 +117,46 @@ export class TabHelpComponent implements OnInit, OnDestroy, AfterViewInit {
     return item.children?.length ?? 0;
   }
 
+  selectTopic(item: TreeItem) {
+    if (item.children?.length) this.treeControl.expand(item);
+    this.loadItem(item);
+  }
+
+  searchTopics() {
+    const terms = this.normalize(this.searchQuery).split(/\s+/u).filter(Boolean);
+    this.searchResults =
+      terms.length > 0 ? this.searchIndex.filter(entry => terms.every(term => entry.searchText.includes(term))) : [];
+  }
+
+  clearSearch() {
+    this.searchQuery = "";
+    this.searchResults = [];
+  }
+
+  private setNavigation(items: TreeItem[]) {
+    this.dataSource.data = items;
+    this.searchIndex = [];
+    const visit = (nodes: TreeItem[], parents: string[] = []) => {
+      for (const item of nodes) {
+        const path = parents.join(" / ");
+        this.searchIndex.push({ item, path, searchText: this.normalize(`${path} ${item.text} ${item.source ?? ""}`) });
+        if (item.children?.length) visit(item.children, [...parents, item.text]);
+      }
+    };
+    visit(items);
+    this.searchTopics();
+  }
+
+  private normalize(value: string) {
+    return value
+      .normalize("NFD")
+      .replaceAll(/[\u0300-\u036F]/gu, "")
+      .toLocaleLowerCase("pt-BR")
+      .trim();
+  }
+
   loadItem(item: TreeItem) {
+    this.currentPath = this.searchIndex.find(entry => entry.item.id === item.id)?.path || "Central de ajuda";
     this.content$?.unsubscribe();
     this.helpPane()?.nativeElement.scrollTo(0, 0);
     this.gaService.event("help_navigation", "Ajuda", item.href || item.id);

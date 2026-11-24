@@ -1,13 +1,32 @@
 <ng-keyboard-shortcuts [shortcuts]="shortcuts" />
 
+<header class="workspace-topbar">
+  <button class="workspace-brand" type="button" aria-label="Ir para o início" (click)="selected.setValue(0)">
+    <span class="brand-mark"><svg-icon src="assets/lightbulb.svg" aria-hidden="true" focusable="false" /></span>
+    <span class="brand-name">Dogol <small>Portugol Webstudio</small></span>
+  </button>
+  <nav class="workspace-shortcuts" aria-label="Acesso rápido">
+    <button type="button" aria-label="Abrir ajuda" (click)="upsertHelpTab()">
+      <svg-icon src="assets/mdi/book-open-page-variant-outline.svg" aria-hidden="true" focusable="false" />
+      <span>Ajuda</span>
+    </button>
+    <button type="button" aria-label="Abrir configurações" (click)="openSettingsModal()">
+      <svg-icon src="assets/mdi/cog-outline.svg" aria-hidden="true" focusable="false" />
+      <span>Configurações</span>
+    </button>
+  </nav>
+</header>
+
 <div id="preload">
   <ngx-monaco-editor />
 </div>
 
 <mat-tab-group
+  class="workspace-tabs"
   animationDuration="0"
   mat-stretch-tabs="false"
   mat-align-tabs="start"
+  [preserveContent]="true"
   [selectedIndex]="selected.value"
   (selectedIndexChange)="selected.setValue($event)"
 >
@@ -22,7 +41,7 @@
         />
       </span>
 
-      <span class="tab-text">Portugol Webstudio</span>
+      <span class="tab-text">Início</span>
     </ng-template>
 
     <app-tab-start
@@ -53,7 +72,7 @@
             }
           </span>
 
-          <span class="tab-text">{{ tab.title }}</span>
+          <span class="tab-text" [title]="tab.title">{{ tab.title }}</span>
         </span>
 
         <span class="tab-actions">
@@ -63,7 +82,7 @@
               aria-label="Renomear aba"
               matTooltip="Renomear aba"
               type="button"
-              (click)="changeTabTitle(tab)"
+              (click)="$event.stopPropagation(); changeTabTitle(tab)"
             >
               <svg-icon src="assets/mdi/rename-outline.svg" aria-hidden="true" focusable="false" />
             </button>
@@ -75,7 +94,7 @@
             matTooltip="Fechar aba"
             type="button"
             [class.single-button]="tab.type === 'editor'"
-            (click)="closeTab(tab)"
+            (click)="$event.stopPropagation(); closeTab(tab)"
           >
             <svg-icon src="assets/mdi/close.svg" aria-hidden="true" focusable="false" />
           </button>
@@ -85,6 +104,7 @@
       @switch (tab.type) {
         @case ("editor") {
           <app-tab-editor
+            [active]="selected.value === $index + 1"
             [code]="tab.contents"
             [(title)]="tab.title"
             (help)="upsertHelpTab()"
@@ -93,7 +113,7 @@
         }
 
         @case ("help") {
-          <app-tab-help (newTab)="addTab($event?.name, $event?.contents)" />
+          <app-tab-help (newTab)="addTab($event.name, $event.contents)" />
         }
       }
     </mat-tab>
@@ -105,6 +125,7 @@
         class="action-button add-button"
         mat-icon-button
         aria-label="Nova aba de editor de código"
+        aria-disabled="false"
         matTooltip="Nova aba de editor de código"
         type="button"
         (click)="addTab()"

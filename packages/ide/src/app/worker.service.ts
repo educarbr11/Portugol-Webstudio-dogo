@@ -1,13 +1,19 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { PortugolCodeError } from "@portugol-webstudio/antlr";
 
 @Injectable({ providedIn: "root" })
-export class WorkerService {
+export class WorkerService implements OnDestroy {
   worker?: Worker;
   busy = false;
 
   init() {
     this.worker = new Worker("assets/portugol-worker/worker.js");
+  }
+
+  ngOnDestroy() {
+    this.worker?.terminate();
+    this.worker = undefined;
+    this.busy = false;
   }
 
   async checkCode(code: string): Promise<{

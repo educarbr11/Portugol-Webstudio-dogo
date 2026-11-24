@@ -25,6 +25,7 @@ import { WorkerService } from "../worker.service";
   standalone: false,
   templateUrl: "./tab-editor.component.html",
   styleUrl: "./tab-editor.component.scss",
+  providers: [WorkerService],
 })
 export class TabEditorComponent implements OnInit, OnDestroy {
   private _code$?: Subscription;
@@ -49,6 +50,9 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   title?: string;
 
   @Input()
+  active = true;
+
+  @Input()
   code?: string;
 
   readonly titleChange = output<string>();
@@ -71,6 +75,10 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     language: "portugol",
     tabCompletion: "on",
     tabSize: 2,
+    fontFamily: "'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace",
+    padding: { top: 16, bottom: 16 },
+    lineNumbersMinChars: 3,
+    scrollBeyondLastLine: false,
   };
 
   stdOutEditor?: monaco.editor.IStandaloneCodeEditor;
@@ -83,6 +91,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     wordWrap: "on",
     language: "plaintext",
     tabSize: 2,
+    fontFamily: "'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace",
+    padding: { top: 12, bottom: 12 },
   };
 
   generatedCodeEditorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
@@ -103,6 +113,30 @@ export class TabEditorComponent implements OnInit, OnDestroy {
 
   get serialMonitoring() {
     return this.arduinoService.serialPort !== null;
+  }
+
+  get serialMonitorDisabled() {
+    return (
+      this.serialBusy ||
+      this.boardBusy ||
+      this.uploadingToBoard ||
+      this.loadingPorts ||
+      this.executor.running ||
+      this.transpiling ||
+      (!this.selectedPort && !this.serialMonitoring)
+    );
+  }
+
+  get uploadDisabled() {
+    return (
+      this.executor.running ||
+      this.transpiling ||
+      this.uploadingToBoard ||
+      this.loadingPorts ||
+      this.serialBusy ||
+      this.boardBusy ||
+      !this.selectedPort
+    );
   }
   readonly arduinoAvailable = this.arduinoService.isAvailable;
   selectedBoardId = this.arduinoService.boards[0].id;
