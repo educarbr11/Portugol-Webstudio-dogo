@@ -18,7 +18,12 @@ mat-dialog-content {
 .logo {
   display: block;
   width: min(80%, 350px);
+  height: auto;
   padding: 0.5rem;
+}
+
+::ng-deep app-dialog-about .logo > svg {
+  height: auto;
 }
 
 .made-with-love {

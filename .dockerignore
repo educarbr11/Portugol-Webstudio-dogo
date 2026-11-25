@@ -11,4 +11,6 @@ packages/resources/recursos.temp
 **/node_modules
 Dockerfile*
 npm-debug.log*
+pnpm-debug.log*
+.pnpm-store
 README.md

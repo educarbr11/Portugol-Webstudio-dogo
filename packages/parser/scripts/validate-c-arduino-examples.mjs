@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { writeArduinoStubs } from "./arduino-test-support.mjs";
+
 import { PortugolCArduino, PortugolErrorChecker } from "../lib/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,45 +18,36 @@ const requiredSnippetsByFile = {
   "02_lacos_escolha.por": ["for (i = 0; i < 5; i++)", "soma += i;", "while ((soma < 20))", "switch (soma)"],
   "03_vetores_matrizes.por": ["int valores[3] = { 1, 2, 3 };", "matriz[0][1] = (matriz[0][0] << 1);"],
   "04_arduino_aliases.por": ["pinMode(led, OUTPUT);", "digitalWrite(led, HIGH);", "void loop()"],
+  "05_esp32_toque.por": [
+    "int leitura = touchRead(pino_toque);",
+    "int leitura_original = touchRead(4);",
+    "if ((touchRead(4) < limiar))",
+  ],
+  "06_sintaxe_sem_prefixo.por": [
+    "pinMode(botao, INPUT_PULLUP);",
+    "return digitalRead(botao);",
+    "estado = digitalRead(botao);",
+    "digitalWrite(led, HIGH);",
+    "digitalWrite(led, LOW);",
+    "delay(100);",
+    "delayMicroseconds(10);",
+  ],
 };
 
 fs.rmSync(buildDir, { recursive: true, force: true });
 fs.mkdirSync(buildDir, { recursive: true });
 
-const examples = fs.readdirSync(examplesDir).filter(file => file.endsWith(".por")).sort();
+const examples = fs
+  .readdirSync(examplesDir)
+  .filter(file => file.endsWith(".por"))
+  .sort();
 
 if (examples.length === 0) {
   throw new Error(`Nenhum exemplo .por encontrado em ${examplesDir}`);
 }
 
 const arduinoHeaderDir = fs.mkdtempSync(path.join(os.tmpdir(), "portugol-arduino-stub-"));
-fs.writeFileSync(
-  path.join(arduinoHeaderDir, "Arduino.h"),
-  [
-    "#pragma once",
-    "#include <stdint.h>",
-    "class String { public: String(const char* = \"\") {} };",
-    "class SerialClass { public: void begin(int) {} template <typename T> void print(T) {} void println() {} };",
-    "extern SerialClass Serial;",
-    "#define HIGH 1",
-    "#define LOW 0",
-    "#define OUTPUT 1",
-    "#define INPUT 0",
-    "#define INPUT_PULLUP 2",
-    "void pinMode(int, int);",
-    "void digitalWrite(int, int);",
-    "int digitalRead(int);",
-    "void analogWrite(int, int);",
-    "int analogRead(int);",
-    "void delay(unsigned long);",
-    "void delayMicroseconds(unsigned long);",
-    "unsigned long millis();",
-    "unsigned long micros();",
-    "void tone(int, unsigned int);",
-    "void noTone(int);",
-    "",
-  ].join("\n"),
-);
+writeArduinoStubs(arduinoHeaderDir);
 
 let hasGpp = true;
 

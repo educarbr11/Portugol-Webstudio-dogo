@@ -33,14 +33,15 @@
     "build:w": "webpack watch"
   },
   "dependencies": {
-    "@portugol-webstudio/antlr": "*",
-    "@portugol-webstudio/parser": "*",
-    "@portugol-webstudio/runtime": "*",
+    "@portugol-webstudio/antlr": "workspace:*",
+    "@portugol-webstudio/parser": "workspace:*",
+    "@portugol-webstudio/runtime": "workspace:*",
     "antlr4ng": "^3.0.16"
   },
   "devDependencies": {
     "antlr-ng": "^1.0.10",
     "babel-loader": "^10.0.0",
+    "terser-webpack-plugin": "^5.3.14",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
   }

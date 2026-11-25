@@ -1,4 +1,4 @@
-<ng-keyboard-shortcuts [shortcuts]="shortcuts" />
+<ng-keyboard-shortcuts [shortcuts]="shortcuts" [disabled]="!active" />
 
 <div class="sidebar">
   <button
@@ -27,7 +27,11 @@
     <div class="arduino-controls">
       <label>
         <span>Placa</span>
-        <select [disabled]="executor.running || transpiling || uploadingToBoard" [(ngModel)]="selectedBoardId">
+        <select
+          aria-label="Placa de desenvolvimento"
+          [disabled]="executor.running || transpiling || uploadingToBoard"
+          [(ngModel)]="selectedBoardId"
+        >
           @for (board of arduinoBoards; track board.id) {
             <option [value]="board.id">{{ board.label }}</option>
           }
@@ -37,7 +41,11 @@
       <label>
         <span>Porta</span>
         <select
-          [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts"
+          aria-label="Porta serial da placa"
+          [title]="selectedPort || 'Nenhuma porta disponível'"
+          [disabled]="
+            executor.running || transpiling || uploadingToBoard || loadingPorts || serialBusy || serialMonitoring
+          "
           [(ngModel)]="selectedPort"
         >
           @for (port of arduinoPorts; track port.name) {
@@ -59,12 +67,36 @@
         <svg-icon src="assets/mdi/refresh.svg" aria-hidden="true" focusable="false" />
       </button>
 
+      @if (usbDriversSupported) {
+        <button
+          mat-ripple
+          type="button"
+          class="arduino-action"
+          title="Verificar e instalar o driver USB da placa conectada"
+          [disabled]="executor.running || transpiling || uploadingToBoard || loadingPorts"
+          (click)="refreshArduinoPorts(true)"
+        >
+          Driver USB
+        </button>
+      }
+
+      <button
+        mat-ripple
+        type="button"
+        class="arduino-action"
+        title="Abrir ou encerrar a recepção no painel Monitor serial"
+        [disabled]="serialMonitorDisabled"
+        (click)="toggleSerialMonitor()"
+      >
+        {{ serialMonitoring ? "Parar serial" : "Monitor serial" }}
+      </button>
+
       <button
         mat-ripple
         type="button"
         class="arduino-action arduino-upload"
         title="Enviar para placa"
-        [disabled]="executor.running || transpiling || uploadingToBoard || !selectedPort"
+        [disabled]="uploadDisabled"
         (click)="uploadArduinoCode()"
       >
         <svg-icon src="assets/mdi/upload.svg" aria-hidden="true" focusable="false" />
@@ -77,6 +109,7 @@
     type="button"
     class="sidebar-button"
     title="Parar execução"
+    aria-label="Parar execução"
     [disabled]="!executor.running && !transpiling && !uploadingToBoard"
     (click)="stopCode()"
   >
@@ -260,12 +293,44 @@
     </as-split-area>
 
     <as-split-area [size]="20">
-      <ngx-monaco-editor
-        id="output"
-        [options]="stdOutEditorOptions"
-        [(ngModel)]="executor.stdOut"
-        (init)="onStdOutEditorInit($event)"
-      />
+      <div class="output-panel">
+        @if (arduinoAvailable) {
+          <div class="output-tabs" role="tablist" aria-label="Saída do programa">
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="outputView === 'console'"
+              (click)="outputView = 'console'"
+            >
+              Console
+            </button>
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="outputView === 'serial'"
+              (click)="outputView = 'serial'"
+            >
+              Monitor serial
+            </button>
+          </div>
+        }
+        <div class="console-output" [hidden]="outputView !== 'console'">
+          <ngx-monaco-editor
+            id="output"
+            [options]="stdOutEditorOptions"
+            [(ngModel)]="executor.stdOut"
+            (init)="onStdOutEditorInit($event)"
+          />
+        </div>
+        @if (arduinoAvailable) {
+          <app-serial-monitor
+            [hidden]="outputView !== 'serial'"
+            [visible]="outputView === 'serial'"
+            [port]="selectedPort"
+            [disabled]="uploadingToBoard || transpiling || loadingPorts || executor.running"
+          />
+        }
+      </div>
     </as-split-area>
   </as-split>
 </div>

@@ -1,3 +1,4 @@
+import { arduinoConstants, arduinoFunctions } from "../arduino-language.js";
 import { Tipo, TipoPrimitivo } from "./Tipo.js";
 
 interface IEscopo {
@@ -9,27 +10,8 @@ interface IEscopo {
 export class Escopo {
   private pilha: IEscopo[] = [];
 
-  constructor(
-    inicial: IEscopo = { variáveis: new Map(), funções: new Map() },
-  ) {
+  constructor(inicial: IEscopo = { variáveis: new Map(), funções: new Map() }) {
     const variáveisBase = new Map<string, Tipo>([
-      // Constantes de nível lógico e modo de pino (Arduino)
-      ["ALTO", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["BAIXO", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["ENTRADA", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["SAIDA", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["ENTRADA_PULLUP", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["alto", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["baixo", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["entrada", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["saida", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["entrada_pullup", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["INPUT", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["OUTPUT", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["INPUT_PULLUP", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["HIGH", { primitivo: TipoPrimitivo.INTEIRO }],
-      ["LOW", { primitivo: TipoPrimitivo.INTEIRO }],
-
       // Pinos analógicos mais comuns
       ["A0", { primitivo: TipoPrimitivo.INTEIRO }],
       ["A1", { primitivo: TipoPrimitivo.INTEIRO }],
@@ -49,6 +31,10 @@ export class Escopo {
       ["A15", { primitivo: TipoPrimitivo.INTEIRO }],
     ]);
 
+    for (const name of Object.keys(arduinoConstants)) {
+      variáveisBase.set(name, { primitivo: TipoPrimitivo.INTEIRO });
+    }
+
     const funçõesBase = new Map<string, Tipo>([
       ["escrever", { primitivo: TipoPrimitivo.VAZIO }],
       ["escreva", { primitivo: TipoPrimitivo.VAZIO }],
@@ -57,6 +43,12 @@ export class Escopo {
       ["limpar", { primitivo: TipoPrimitivo.VAZIO }],
       ["limpa", { primitivo: TipoPrimitivo.VAZIO }],
     ]);
+
+    for (const definition of arduinoFunctions) {
+      for (const name of [definition.name, ...definition.aliases]) {
+        funçõesBase.set(name, { primitivo: definition.returnType });
+      }
+    }
 
     this.pilha.push({
       variáveis: new Map([...variáveisBase, ...inicial.variáveis]),
@@ -126,7 +118,8 @@ export class Escopo {
   }
 
   getVariável(nome: string) {
-    for (const escopo of this.pilha) {
+    for (let index = this.pilha.length - 1; index >= 0; index--) {
+      const escopo = this.pilha[index];
       if (escopo.variáveis.has(nome)) {
         return escopo.variáveis.get(nome);
       }
@@ -136,7 +129,8 @@ export class Escopo {
   }
 
   getFunção(nome: string) {
-    for (const escopo of this.pilha) {
+    for (let index = this.pilha.length - 1; index >= 0; index--) {
+      const escopo = this.pilha[index];
       if (escopo.funções.has(nome)) {
         return escopo.funções.get(nome);
       }

@@ -33,10 +33,10 @@
   "scripts": {
     "build": "tsc",
     "build:w": "tsc -w",
-    "test": "npm run build --workspace=@portugol-webstudio/antlr && npm run build && node scripts/validate-infinitive-commands.mjs && node scripts/validate-c-arduino-examples.mjs"
+    "test": "pnpm --filter @portugol-webstudio/antlr run build && pnpm run build && node scripts/validate-infinitive-commands.mjs && node scripts/validate-c-arduino-examples.mjs && node scripts/validate-arduino-sensors.mjs"
   },
   "dependencies": {
-    "@portugol-webstudio/antlr": "*",
+    "@portugol-webstudio/antlr": "workspace:*",
     "antlr4ng": "^3.0.16"
   },
   "devDependencies": {

@@ -18,7 +18,7 @@ export class ThemeService {
     startWith(this.localStorageSvc.retrieve("theme") || "auto"),
     switchMap<string, Observable<Theme>>(pref => {
       if (pref === "light" || pref === "dark") {
-        return of(pref as Theme);
+        return of(pref);
       } else {
         return this.browserTheme.theme$;
       }

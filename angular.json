@@ -59,7 +59,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/@portugol-webstudio/resources/assets",
+                "input": "packages/resources/assets",
                 "output": "assets/recursos/"
               },
               {

@@ -36,6 +36,103 @@ app-root {
 body {
   background-color: var(--pws-body-bg);
   color: var(--pws-body-color);
+  color-scheme: var(--pws-color-scheme);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[tabindex] {
+  &:focus-visible {
+    outline: 2px solid var(--pws-color-secondary);
+    outline-offset: 3px;
+  }
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--pws-color-primary);
+}
+
+::selection {
+  background: rgba(var(--pws-color-secondary-rgb), 0.28);
+  color: var(--pws-text-100);
+}
+
+.cdk-overlay-dark-backdrop {
+  background: rgba(3, 8, 18, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.pws-dialog {
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-shape: var(--pws-radius-lg);
+    --mat-dialog-container-color: var(--pws-bg-200);
+    --mat-dialog-subhead-color: var(--pws-text-100);
+    --mat-dialog-supporting-text-color: var(--pws-text-200);
+    --mat-dialog-subhead-font: var(--pws-font);
+    --mat-dialog-supporting-text-font: var(--pws-font);
+  }
+
+  .mat-mdc-dialog-surface {
+    border: 1px solid var(--pws-border-color);
+    border-radius: var(--pws-radius-lg);
+    background: var(--pws-bg-200);
+    color: var(--pws-text-100);
+    box-shadow: var(--pws-shadow-dialog);
+  }
+
+  .mat-mdc-dialog-content {
+    color: var(--pws-text-200);
+    line-height: 1.6;
+  }
+
+  .mat-mdc-dialog-title {
+    color: var(--pws-text-100);
+    font-family: var(--pws-font);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .mat-mdc-button-base {
+    border-radius: var(--pws-radius-sm);
+    font-family: var(--pws-font);
+  }
+
+  .mat-mdc-dialog-actions {
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--pws-border-color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 .as-split-gutter {
@@ -58,7 +155,18 @@ s {
   display: flex;
 }
 
+svg-icon {
+  display: inline-flex;
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 svg-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
   fill: currentColor;
 }
 
@@ -97,7 +205,8 @@ markdown {
     border-left: 0.25rem solid var(--pws-color-secondary);
   }
 
-  a, a:visited {
+  a,
+  a:visited {
     color: var(--pws-color-blue);
     text-decoration: none;
 
@@ -153,6 +262,42 @@ markdown {
     .code-value {
       color: #b7e986;
     }
+  }
+}
+
+.markdown-content markdown {
+  line-height: 1.6;
+
+  pre {
+    overflow-x: auto;
+    padding: 1rem;
+    background-color: var(--pws-bg-100);
+    border-radius: 0.25rem;
+
+    code {
+      display: block;
+      padding: 0;
+      line-height: 1.5;
+    }
+  }
+
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--pws-text-muted);
+    text-align: left;
+  }
+
+  th {
+    background-color: var(--pws-bg-100);
   }
 }
 

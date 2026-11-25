@@ -33,27 +33,35 @@ O Portugol Webstudio é um projeto que utiliza o framework [Angular](https://ang
 
 ## Executando o código localmente
 
-1. Certifique-se de possuir instalado o [Node.js LTS](https://nodejs.org/pt-br/download/)
+1. Instale o [Node.js 22](https://nodejs.org/pt-br/download/) e o pnpm `10.34.9`. A versão está fixada no campo `packageManager`; se precisar ativar o Corepack incluído no Node.js, execute `corepack enable`.
 
 2. Instale as dependências do projeto
 
 ```sh
-npm ci
+pnpm install --frozen-lockfile
 ```
 
 3. Compile os pacotes:
 
 ```sh
-npm run build
+pnpm run build
 ```
 
 4. Inicie o servidor de desenvolvimento:
 
 ```sh
-npm start
+pnpm start
 ```
 
 Após isto, você poderá acessar a IDE em: [http://localhost:4200](http://localhost:4200)
+
+### Reutilização do armazenamento
+
+O workspace é definido em `pnpm-workspace.yaml` e usa um único `pnpm-lock.yaml`. As instalações aproveitam o store global do pnpm, compartilhado com outros projetos no mesmo disco. Consulte o caminho com `pnpm store path`.
+
+O layout `hoisted` preserva a compatibilidade dos assets do Angular e das ferramentas atuais. O patch de `iconv-lite` é aplicado pelo próprio pnpm antes de vincular os pacotes, sem alterar arquivos compartilhados após a instalação.
+
+Use pnpm para instalar e executar os scripts deste projeto. Outros projetos instalados com npm precisam de sua própria migração e não são alterados automaticamente. Mantenha o store entre builds; quando precisar remover pacotes sem referência, `pnpm store prune` libera esse conteúdo, que poderá ser baixado novamente depois.
 
 ## Deploy com Docker
 

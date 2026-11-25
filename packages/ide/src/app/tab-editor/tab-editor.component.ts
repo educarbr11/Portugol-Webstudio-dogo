@@ -25,10 +25,12 @@ import { WorkerService } from "../worker.service";
   standalone: false,
   templateUrl: "./tab-editor.component.html",
   styleUrl: "./tab-editor.component.scss",
+  providers: [WorkerService],
 })
 export class TabEditorComponent implements OnInit, OnDestroy {
   private _code$?: Subscription;
   private _stdOut$?: Subscription;
+  private _waitingForInput$?: Subscription;
   private _events$?: Subscription;
   private _arduinoOutput$?: Subscription;
   private _theme$?: Subscription;
@@ -46,6 +48,9 @@ export class TabEditorComponent implements OnInit, OnDestroy {
 
   @Input()
   title?: string;
+
+  @Input()
+  active = true;
 
   @Input()
   code?: string;
@@ -70,6 +75,10 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     language: "portugol",
     tabCompletion: "on",
     tabSize: 2,
+    fontFamily: "'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace",
+    padding: { top: 16, bottom: 16 },
+    lineNumbersMinChars: 3,
+    scrollBeyondLastLine: false,
   };
 
   stdOutEditor?: monaco.editor.IStandaloneCodeEditor;
@@ -82,6 +91,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     wordWrap: "on",
     language: "plaintext",
     tabSize: 2,
+    fontFamily: "'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace",
+    padding: { top: 12, bottom: 12 },
   };
 
   generatedCodeEditorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
@@ -92,6 +103,41 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   sharing = false;
   uploadingToBoard = false;
   loadingPorts = false;
+  usbDriversSupported = false;
+  serialBusy = false;
+  outputView: "console" | "serial" = "console";
+
+  get boardBusy() {
+    return this.arduinoService.boardBusy || this.arduinoService.serialBusy;
+  }
+
+  get serialMonitoring() {
+    return this.arduinoService.serialPort !== null;
+  }
+
+  get serialMonitorDisabled() {
+    return (
+      this.serialBusy ||
+      this.boardBusy ||
+      this.uploadingToBoard ||
+      this.loadingPorts ||
+      this.executor.running ||
+      this.transpiling ||
+      (!this.selectedPort && !this.serialMonitoring)
+    );
+  }
+
+  get uploadDisabled() {
+    return (
+      this.executor.running ||
+      this.transpiling ||
+      this.uploadingToBoard ||
+      this.loadingPorts ||
+      this.serialBusy ||
+      this.boardBusy ||
+      !this.selectedPort
+    );
+  }
   readonly arduinoAvailable = this.arduinoService.isAvailable;
   selectedBoardId = this.arduinoService.boards[0].id;
   selectedPort = "";
@@ -146,6 +192,14 @@ export class TabEditorComponent implements OnInit, OnDestroy {
 
     this._stdOut$ = this.executor.stdOut$.subscribe(() => {
       this.stdOutEditorCursorEnd();
+    });
+    this._waitingForInput$ = this.executor.waitingForInput$.subscribe(waiting => {
+      if (waiting) {
+        this.outputView = "console";
+        setTimeout(() => {
+          if (this.executor.waitingForInput) this.stdOutEditor?.focus();
+        }, 0);
+      }
     });
 
     if (this.arduinoAvailable) {
@@ -243,6 +297,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this._events$?.unsubscribe();
     this._arduinoOutput$?.unsubscribe();
     this._stdOut$?.unsubscribe();
+    this._waitingForInput$?.unsubscribe();
     this._theme$?.unsubscribe();
     this._settings$?.unsubscribe();
     this.arduinoService.destroyListeners();
@@ -314,7 +369,15 @@ export class TabEditorComponent implements OnInit, OnDestroy {
   }
 
   async uploadArduinoCode() {
-    if (!this.arduinoAvailable) {
+    if (
+      !this.arduinoAvailable ||
+      this.uploadingToBoard ||
+      this.loadingPorts ||
+      this.serialBusy ||
+      this.boardBusy ||
+      this.transpiling ||
+      this.executor.running
+    ) {
       return;
     }
 
@@ -327,6 +390,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     }
 
     this.uploadingToBoard = true;
+    this.outputView = "console";
     this.transpiling = true;
     this.executor.stdOut = "";
     this.executor.stdOut$.next(this.executor.stdOut);
@@ -361,6 +425,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.appendOutput("Código C/Arduino gerado com sucesso.\n");
 
     try {
+      const setupStarted = performance.now();
       const setup = await this.arduinoService.checkSetup(this.selectedBoardId);
 
       if (!setup.ready) {
@@ -368,6 +433,7 @@ export class TabEditorComponent implements OnInit, OnDestroy {
         await this.arduinoService.initializeSetup(this.selectedBoardId);
       }
 
+      this.appendOutput(`Preparação concluída em ${((performance.now() - setupStarted) / 1000).toFixed(1)} s.\n`);
       this.appendOutput(`Enviando para ${this.selectedPort}...\n`);
       const uploadResult = await this.arduinoService.compileAndUpload(
         result.c,
@@ -403,7 +469,26 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.stdOutEditorCursorEnd();
   }
 
-  async refreshArduinoPorts() {
+  async toggleSerialMonitor() {
+    if (this.serialBusy || this.uploadingToBoard || this.boardBusy) return;
+    this.outputView = "serial";
+    this.serialBusy = true;
+    try {
+      if (this.serialMonitoring) {
+        await this.arduinoService.stopSerialMonitor();
+        this.appendOutput("\nMonitor serial encerrado.\n");
+      } else if (this.selectedPort) {
+        await this.arduinoService.startSerialMonitor(this.selectedPort);
+        this.appendOutput(`\nMonitor serial: ${this.selectedPort}, ${this.arduinoService.serialBaudRate} baud.\n`);
+      }
+    } catch (error) {
+      this.appendOutput(`\nErro no monitor serial: ${String(error)}\n`);
+    } finally {
+      this.serialBusy = false;
+    }
+  }
+
+  async refreshArduinoPorts(retryDrivers = false) {
     if (!this.arduinoAvailable) {
       return;
     }
@@ -411,6 +496,16 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     this.loadingPorts = true;
 
     try {
+      try {
+        const drivers = await this.arduinoService.prepareUsbDrivers(retryDrivers);
+        this.usbDriversSupported = drivers.supported;
+        if (drivers.message && drivers.devices.some(device => device.needs_driver || device.problem_code !== 0)) {
+          this.appendOutput(`${drivers.message}\n`);
+        }
+      } catch (error) {
+        this.appendOutput(`Não foi possível verificar os drivers USB:\n${String(error)}\n`);
+      }
+
       this.arduinoPorts = await this.arduinoService.readPorts();
 
       if (!this.selectedPort || !this.arduinoPorts.some(port => port.name === this.selectedPort)) {
@@ -581,8 +676,8 @@ export class TabEditorComponent implements OnInit, OnDestroy {
     const model = editor.getModel();
 
     if (model) {
-      // TODO: Find a better way to do this
       setTimeout(() => {
+        if (editor.getModel() !== model) return;
         editor.setPosition({
           lineNumber: model.getLineCount(),
           column: model.getLineMaxColumn(model.getLineCount()),
@@ -593,8 +688,6 @@ export class TabEditorComponent implements OnInit, OnDestroy {
           scrollTop: editor.getScrollHeight(),
         });
       }, 1);
-
-      editor.focus();
     }
   }
 
