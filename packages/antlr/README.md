@@ -25,7 +25,7 @@ Os arquivos gerados serão salvos na pasta `src`, dentre eles:
 import { PortugolLexer, PortugolParser } from "@portugol-webstudio/antlr";
 import { CharStream, CommonTokenStream } from "antlr4ng";
 
-const code = 'programa { funcao inicio() { escreva("Hello World!") } }';
+const code = 'programa { funcao inicio() { escrever("Hello World!") } }';
 const inputStream = CharStream.fromString(code);
 const lexer = new PortugolLexer(inputStream);
 const tokenStream = new CommonTokenStream(lexer);

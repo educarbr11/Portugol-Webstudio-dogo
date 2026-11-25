@@ -15,7 +15,7 @@ import { CharStreams, CommonTokenStream } from "antlr4ng";
 
 const code = `programa {
   funcao inicio() {
-    escreva("Olá mundo!")
+    escrever("Olá mundo!")
   }
 }`;
 
@@ -41,7 +41,7 @@ Exemplo de código transpilado pelo código acima:
 
 
     await runtime.callFunction(
-      "escreva",
+      "escrever",
       "",
       [
         new PortugolVar("cadeia", "Olá mundo!"),

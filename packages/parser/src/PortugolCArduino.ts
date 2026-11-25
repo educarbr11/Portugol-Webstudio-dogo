@@ -1,6 +1,6 @@
 import { ArquivoContext, PortugolCodeError } from "@portugol-webstudio/antlr";
 
-import { Tipo } from "./helpers/Tipo.js";
+import { Tipo, TipoPrimitivo } from "./helpers/Tipo.js";
 import { arduinoFunctions, arduinoConstants, ArduinoFeature } from "./arduino-language.js";
 import { arduinoRuntime } from "./arduino-runtime.js";
 import {
@@ -71,6 +71,9 @@ import {
 import { PortugolNode } from "./PortugolNode.js";
 
 export class PortugolCArduino {
+  private static inputFunctionNames = new Set(["ler", "leia"]);
+  private static outputFunctionNames = new Set(["escrever", "escreva"]);
+
   private features = new Set<ArduinoFeature>();
   private userFunctions = new Set<string>();
   private variableScopes: Array<Set<string>> = [new Set()];
@@ -199,26 +202,33 @@ export class PortugolCArduino {
 
   private emitTipo(tipo: Tipo): string {
     switch (tipo.primitivo) {
-      case "inteiro":
+      case TipoPrimitivo.INTEIRO: {
         return "int";
+      }
 
-      case "real":
+      case TipoPrimitivo.REAL: {
         return "float";
+      }
 
-      case "logico":
+      case TipoPrimitivo.LÓGICO: {
         return "bool";
+      }
 
-      case "caracter":
+      case TipoPrimitivo.CARACTER: {
         return "char";
+      }
 
-      case "cadeia":
+      case TipoPrimitivo.CADEIA: {
         return "String";
+      }
 
-      case "vazio":
+      case TipoPrimitivo.VAZIO: {
         return "void";
+      }
 
-      default:
+      default: {
         return "auto";
+      }
     }
   }
 
@@ -386,12 +396,9 @@ export class PortugolCArduino {
   private emitDeclaracao(declaracao: DeclaracaoCmd): string {
     this.variableScopes.at(-1)!.add(declaracao.nome);
     const tipo = this.emitTipo(declaracao.tipo);
-    const declaracaoVetor = declaracao.children.find(child => child instanceof DeclaracaoVetorExpr) as
-      DeclaracaoVetorExpr | undefined;
-    const declaracaoMatriz = declaracao.children.find(child => child instanceof DeclaracaoMatrizExpr) as
-      DeclaracaoMatrizExpr | undefined;
-    const declaracaoVariavel = declaracao.children.find(child => child instanceof DeclaracaoVariavelExpr) as
-      DeclaracaoVariavelExpr | undefined;
+    const declaracaoVetor = declaracao.children.find(child => child instanceof DeclaracaoVetorExpr);
+    const declaracaoMatriz = declaracao.children.find(child => child instanceof DeclaracaoMatrizExpr);
+    const declaracaoVariavel = declaracao.children.find(child => child instanceof DeclaracaoVariavelExpr);
 
     const tipoVetor =
       "dimensão" in declaracao.tipo && declaracao.tipo.dimensão === "vetor" ? declaracao.tipo : undefined;
@@ -466,7 +473,7 @@ export class PortugolCArduino {
       return `${this.emitReferencia(inicializacao.variável)} = ${this.emitExpressao(inicializacao.expressão)}`;
     }
 
-    return this.emitExpressao(inicializacao as Expressao);
+    return this.emitExpressao(inicializacao);
   }
 
   private emitForCondicao(condicao: Expressao): string {
@@ -705,7 +712,7 @@ export class PortugolCArduino {
   }
 
   private emitChamadaFuncaoComando(chamada: ChamadaFuncaoExpr) {
-    if (!chamada.escopoBiblioteca && chamada.nome === "escreva") {
+    if (!chamada.escopoBiblioteca && PortugolCArduino.outputFunctionNames.has(chamada.nome)) {
       const argumentosChamada = this.getCallArguments(chamada);
 
       if (argumentosChamada.length === 0) {
@@ -720,8 +727,8 @@ export class PortugolCArduino {
       return;
     }
 
-    if (!chamada.escopoBiblioteca && chamada.nome === "leia") {
-      this.push("// TODO: leitura de Serial (leia) não implementada no transpiler básico");
+    if (!chamada.escopoBiblioteca && PortugolCArduino.inputFunctionNames.has(chamada.nome)) {
+      this.push("// TODO: leitura de Serial (ler) não implementada no transpiler básico");
       return;
     }
 
@@ -772,26 +779,33 @@ export class PortugolCArduino {
 
     if (bibliotecaLower === "matematica") {
       switch (chamada.nome) {
-        case "potencia":
+        case "potencia": {
           return "pow";
+        }
 
-        case "raiz":
+        case "raiz": {
           return "pow";
+        }
 
-        case "seno":
+        case "seno": {
           return "sin";
+        }
 
-        case "cosseno":
+        case "cosseno": {
           return "cos";
+        }
 
-        case "tangente":
+        case "tangente": {
           return "tan";
+        }
 
-        case "valor_absoluto":
+        case "valor_absoluto": {
           return "abs";
+        }
 
-        default:
+        default: {
           return chamada.nome;
+        }
       }
     }
 

@@ -30,5 +30,23 @@ jobs:
           pnpm run build
           pnpm run release
 
+      - name: Test parser and Arduino functions
+        run: pnpm run test:parser
+
+      - name: Test resource canonicalization
+        run: pnpm run test:resources
+
+      - name: Test Angular Forms integration
+        run: pnpm run test:forms
+
+      - name: Test application startup
+        run: pnpm run test:startup
+
+      - name: Test serial monitor
+        run: pnpm run test:serial
+
+      - name: Test help tutorials
+        run: pnpm run test:help
+
       - name: Lint 🚨
         run: pnpm run lint

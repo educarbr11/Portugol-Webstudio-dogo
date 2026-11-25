@@ -21,6 +21,6 @@ export class FileService {
       confidence,
     });
 
-    return decode(array as any, encoding || "utf8", { stripBOM: true });
+    return decode(array, encoding || "utf8", { stripBOM: true });
   }
 }

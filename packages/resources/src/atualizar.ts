@@ -5,10 +5,15 @@ import url from "node:url";
 import AdmZip from "adm-zip";
 import * as rimraf from "rimraf";
 
-import { baseDir, baseHtmlPath } from "./config.js";
+import { baseDir, baseHtmlPath, resourcePatchVersion } from "./config.js";
 import { generateExamplesJson } from "./helpers/exemplos.js";
 import { download, getETag } from "./helpers/internet.js";
-import { patchHtmlFiles, patchPortugolFiles } from "./helpers/patch.js";
+import {
+  patchHelpNavigation,
+  patchHelpSyntaxHighlighter,
+  patchHtmlFiles,
+  patchPortugolFiles,
+} from "./helpers/patch.js";
 
 import "./ajuda.js";
 
@@ -26,6 +31,7 @@ export async function configurarRecursos() {
     const fileUrl = "https://github.com/UNIVALI-LITE/Portugol-Studio/archive/master.zip";
     const remoteEtag = await getETag(fileUrl);
     const localEtag = path.join(baseDir, "etag");
+    const resourceCacheKey = `${remoteEtag}\n${resourcePatchVersion}`;
 
     console.log("Remote ETag:", remoteEtag);
 
@@ -34,7 +40,7 @@ export async function configurarRecursos() {
 
       console.log("Local ETag:", localETagContents);
 
-      if (localETagContents === remoteEtag) {
+      if (localETagContents === resourceCacheKey) {
         console.log("Recursos de ajuda já estão atualizados.");
         return;
       }
@@ -61,6 +67,12 @@ export async function configurarRecursos() {
     rimraf.sync(tempDir);
     await fs.unlink(psZip);
 
+    console.log("Ajustando índice da aba Ajuda…");
+    await patchHelpNavigation();
+
+    console.log("Ajustando realce de sintaxe da aba Ajuda…");
+    await patchHelpSyntaxHighlighter();
+
     console.log("Gerando índice da aba Ajuda…");
     await import(url.pathToFileURL(path.join(baseDir, "ajuda", "scripts", "topicos.js")).toString());
 
@@ -76,7 +88,7 @@ export async function configurarRecursos() {
       JSON.stringify(await generateExamplesJson(path.join(baseDir, "exemplos"), "")),
     );
 
-    await fs.writeFile(localEtag, remoteEtag);
+    await fs.writeFile(localEtag, resourceCacheKey);
 
     console.log("Configuração de recursos concluída!");
   } catch (error) {

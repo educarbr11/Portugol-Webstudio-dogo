@@ -49,7 +49,9 @@ platformBrowser()
       const retry = document.createElement("button");
       retry.type = "button";
       retry.textContent = "Tentar novamente";
-      retry.onclick = () => window.location.reload();
+      retry.addEventListener("click", () => {
+        window.location.reload();
+      });
       const panel = document.createElement("section");
       panel.style.cssText = "display:block;padding:24px;color:#e5e7eb;background:#111827;font:16px sans-serif";
       panel.append(message, retry);

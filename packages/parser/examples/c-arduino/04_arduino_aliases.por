@@ -1,6 +1,6 @@
 programa
 {
-  inclua biblioteca Arduino
+  incluir biblioteca Arduino
 
   inteiro led = 13
 

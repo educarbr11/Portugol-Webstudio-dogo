@@ -16,7 +16,7 @@ body:
       label: Descrição do problema
       description: Explique brevemente o problema encontrado.
       placeholder: |
-        Exemplo: Ao tentar executar o código, a IDE exibe um erro de sintaxe ao usar a função "escreva".
+        Exemplo: Ao tentar executar o código, a IDE exibe um erro de sintaxe ao usar a função "escrever".
     validations:
       required: true
   - type: textarea

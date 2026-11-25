@@ -128,6 +128,14 @@ export class MonacoService {
             ],
 
             keywords: [
+              // Formas canônicas no infinitivo
+              "fazer",
+              "escolher",
+              "parar",
+              "retornar",
+              "incluir",
+
+              // Aliases legados
               "faca",
               "enquanto",
               "para",

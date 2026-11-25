@@ -29,7 +29,8 @@
     "assets"
   ],
   "scripts": {
-    "build": "node --no-warnings --loader ts-node/esm src/atualizar.ts"
+    "build": "node --no-warnings --loader ts-node/esm src/atualizar.ts",
+    "test": "node --no-warnings --loader ts-node/esm scripts/validate-infinitive-patch.mjs"
   },
   "devDependencies": {
     "@swc/core": "^1.15.1",
@@ -37,7 +38,7 @@
     "@types/ini": "^4.1.1",
     "adm-zip": "^0.5.16",
     "axios": "^1.13.2",
-    "iconv-lite": "^0.7.0",
+    "iconv-lite": "0.7.0",
     "ini": "^6.0.0",
     "readdirp": "^4.1.2",
     "rimraf": "^6.1.0",

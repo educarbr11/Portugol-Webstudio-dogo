@@ -21,7 +21,7 @@ A classe `PortugolExecutor` exporta uma interface com as seguintes propriedades:
 - `events$`: um `Subject` onde você pode se inscrever para receber os eventos de execução do programa, dentre eles:
 
   - `start`: o programa começou a ser executado
-  - `clear`: o comando `limpa()` foi executado e a janela de saída foi limpa
+  - `clear`: o comando `limpar()` foi executado e a janela de saída foi limpa
   - `stdIn`: o programa está esperando uma entrada do usuário
   - `finish`: o programa terminou de ser executado (inclui a propriedade `time`, que indica quanto tempo o programa ficou em execução, em milissegundos)
 
@@ -54,7 +54,7 @@ executor.stdOut$.subscribe(stdOut => {
 
 executor.run(`programa {
   funcao inicio() {
-    escreva("Olá mundo!")
+    escrever("Olá mundo!")
   }
 }`);
 ```

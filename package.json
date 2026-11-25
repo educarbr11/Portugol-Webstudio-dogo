@@ -41,6 +41,7 @@
     "test:startup": "node packages/ide/scripts/validate-sharing-startup.mjs",
     "test:serial": "node packages/ide/scripts/validate-serial-monitor.mjs",
     "test:help": "lerna run build --scope=@portugol-webstudio/parser --include-dependencies && node packages/ide/scripts/validate-help-tutorials.mjs",
+    "test:resources": "lerna run test --scope=@portugol-webstudio/resources",
     "release": "lerna run release"
   },
   "devDependencies": {

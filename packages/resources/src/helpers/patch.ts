@@ -5,6 +5,7 @@ import iconv from "iconv-lite";
 import readdirp from "readdirp";
 
 import { baseDir, baseHtmlPath } from "../config.js";
+import { canonicalizePortugolCode, canonicalizeVisibleText } from "./infinitive.js";
 
 let _ajudaCss: string | null = null;
 
@@ -35,7 +36,7 @@ async function getAjudaCss() {
 }
 
 async function patchHtmlFile(data: Buffer) {
-  return data
+  const html = data
     .toString("utf8")
     .replace(
       "<head>",
@@ -55,6 +56,31 @@ async function patchHtmlFile(data: Buffer) {
     .replace("${syntax}", "SyntaxHighlighter.css")
     .replace("SyntaxHighlighter.css/>", 'SyntaxHighlighter.css"/>')
     .replaceAll("${tema}", "Dark");
+
+  return html.replaceAll(/>([^<]+)</gu, (_match, visibleText: string) => {
+    return `>${canonicalizeVisibleText(visibleText)}<`;
+  });
+}
+
+export async function patchHelpNavigation() {
+  const fileName = path.join(baseDir, "ajuda", "scripts", "topicos.js");
+  const data = await fs.readFile(fileName, "utf8");
+  const patched = data.replaceAll(/(titulo:\s*")([^"]+)(")/gu, (_match, prefix, title, suffix) => {
+    return `${prefix}${canonicalizeVisibleText(title)}${suffix}`;
+  });
+
+  await fs.writeFile(fileName, patched);
+}
+
+export async function patchHelpSyntaxHighlighter() {
+  const fileName = path.join(baseDir, "ajuda", "scripts", "SyntaxHighlighter", "shBrushPortugol.js");
+  const data = await fs.readFile(fileName, "utf8");
+  const patched = data
+    .replace("para pare retorne escolha", "para parar pare retornar retorne escolher escolha")
+    .replace("enquanto faca contrario", "enquanto fazer faca contrario")
+    .replace("inclua biblioteca vazio", "incluir inclua biblioteca vazio");
+
+  await fs.writeFile(fileName, patched);
 }
 
 export async function patchHtmlFiles() {
@@ -87,6 +113,6 @@ export async function patchPortugolFiles() {
       data = data.slice(0, Math.max(0, portugolSignaturePos));
     }
 
-    await fs.writeFile(fileName, data);
+    await fs.writeFile(fileName, canonicalizePortugolCode(data));
   }
 }
